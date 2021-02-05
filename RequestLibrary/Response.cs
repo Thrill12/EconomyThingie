@@ -14,7 +14,7 @@ namespace Server
         public bool HasData => data != null;
         public string DataString => $"{type.AssemblyQualifiedName}\n{JsonConvert.SerializeObject(data)}";
 
-        private Response(object data, Type type)
+        public Response(object data, Type type)
         {
             this.data = data;
             this.type = type;
@@ -27,7 +27,7 @@ namespace Server
 
         public static Response From<T>(T data)
         {
-            return new Response(data, typeof(T));
+            return new Response(data, data.GetType());
         }
 
     }

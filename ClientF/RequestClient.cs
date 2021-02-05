@@ -7,10 +7,14 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Server;
+using System.Threading;
+using RequestLibrary;
+using System.Windows.Threading;
 
 namespace ClientF
 {
-    class RequestClient
+    public class RequestClient : IDisposable
     {
 
         private TcpClient client;
@@ -19,10 +23,22 @@ namespace ClientF
 
         public bool IsConnected { get { return client != null && client.Connected; } }
 
+        private readonly Thread receivingThread;
+        private readonly Queue<object> responses = new Queue<object>();
+        private readonly Dictionary<Type, Dictionary<object, List<Action<object>>>> callbacks = new Dictionary<Type, Dictionary<object, List<Action<object>>>>();
+        private readonly Dispatcher dispatcher;
+
         public RequestClient(IPAddress ip, ushort port)
         {
             this.ip = ip;
             this.port = port;
+            dispatcher = Dispatcher.CurrentDispatcher;
+
+            receivingThread = new Thread(ReceivePackets)
+            {
+                IsBackground = true
+            };
+            receivingThread.Start();
         }
 
         public void EnforceConnection()
@@ -51,16 +67,77 @@ namespace ClientF
         {
             SendRequest(request);
 
-            using (BinaryReader reader = new BinaryReader(client.GetStream(), Encoding.ASCII, leaveOpen: true))
+            while (responses.Count == 0) ;
+            lock (responses)
             {
-                string[] response = reader.ReadString().Split('\n');
-                Type type = Type.GetType(response[0]);
-                object data = JsonConvert.DeserializeObject(response[1], type);
-
-                return (T)data;
+                return (T)responses.Dequeue();
             }
-
+        
         }
 
+        private void ReceivePackets(object obj)
+        {
+            while (true)
+            {
+                if (IsConnected && client.Available > 0)
+                {
+                    using (BinaryReader reader = new BinaryReader(client.GetStream(), Encoding.ASCII, leaveOpen: true))
+                    {
+                        string[] response = reader.ReadString().Split('\n');
+                        Type type = Type.GetType(response[0]);
+                        object data = JsonConvert.DeserializeObject(response[1], type);
+
+                        if (type.IsSubclassOf(typeof(Alert)) && callbacks.ContainsKey(type))
+                        {
+                            foreach (var x in callbacks[type].Values)
+                            {
+                                foreach (var callback in x)
+                                    dispatcher.Invoke(() => callback(data));
+                            }
+                        }
+                        else
+                        {
+                            lock (responses)
+                            {
+                                responses.Enqueue(data);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    EnforceConnection();
+                }
+            }
+        }
+
+        public void SubscribeTo<T>(object sender, Action<T> callback) where T : Alert
+        {
+            Action<object> wrappedCallback = (o) => callback((T)o);
+
+            if (!callbacks.ContainsKey(typeof(T)))
+                callbacks.Add(typeof(T), new Dictionary<object, List<Action<object>>>());
+
+            if (!callbacks[typeof(T)].ContainsKey(sender))
+                callbacks[typeof(T)].Add(sender, new List<Action<object>>());
+
+            callbacks[typeof(T)][sender].Add(wrappedCallback);
+        }
+
+        public void Unsubscribe(object sender)
+        {
+            foreach (var type in callbacks.Values)
+            {
+                if (type.ContainsKey(sender))
+                    type.Remove(sender);
+            }
+        }
+
+        public void Dispose()
+        {
+            receivingThread.Abort();
+            client.Close();
+            client.Dispose();
+        }
     }
 }

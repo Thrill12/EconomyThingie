@@ -1,4 +1,5 @@
 ﻿using RequestLibrary;
+using RequestLibrary.Alerts;
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
@@ -55,6 +56,7 @@ namespace Server
                 liveUsers.Add(currentUser.seshID, currentUser);
 
                 StarDatabaseCode.InsertUser(currentUser);
+                RequestListener.alerter.RegisterUser(currentUser.username);
                 return Response.From(currentUser);
             }
         }
@@ -98,6 +100,7 @@ namespace Server
                         currUser.seshID = CreateSessionID(currUser.username, DateTime.Now);
                         liveUsers.Add(currUser.seshID, currUser);
 
+                        RequestListener.alerter.RegisterUser(currUser.username);
                         return Response.From(currUser);
                     }
                     else
@@ -120,6 +123,9 @@ namespace Server
 
         public static Response UpdateClientOnServerRequestHandler(UpdateClientOnServerRequest arg)
         {
+            RequestListener.alerter.SendAlerts(new TestAlert("Hello"), arg.user.username);
+
+
             string command = $"UPDATE users SET galacticcredits={arg.user.galacticCredits} WHERE username='{arg.user.username}'";
             using var cmd = new SQLiteCommand(command, StarDatabaseCode.sqlite_conn);
             cmd.ExecuteNonQuery();
@@ -144,7 +150,7 @@ namespace Server
 
         public static Response SendChatRequestHandler(SendChatRequest arg)
         {
-            
+            return null;
         }
 
         public static string CreateSessionID(string name, DateTime time)

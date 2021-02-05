@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -159,7 +160,7 @@ namespace Server
             SQLiteCommand addHyperLane;
             addHyperLane = sqlite_conn.CreateCommand();
             addHyperLane.CommandText = @$"INSERT INTO hyperlanes(sysid1, sysid2, length) 
-                                                            VALUES({hyperlane.sysid1.ID}, {hyperlane.sysid2.ID}, {hyperlane.length}); ";
+                                                            VALUES({hyperlane.sysid1.ID}, {hyperlane.sysid2.ID}, {hyperlane.length.ToString(CultureInfo.InvariantCulture)}); ";
             addHyperLane.ExecuteNonQuery();
         }
 

@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json;
+using RequestLibrary;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -10,15 +12,39 @@ using System.Threading;
 
 namespace Server
 {
-    class RequestListener
+    public class RequestListener
     {
 
         private Dictionary<Type, Func<object, Response>> registeredRequests = new Dictionary<Type, Func<object, Response>>();
         private TcpListener tcpListener;
 
+        private readonly Dictionary<Thread, string> users = new Dictionary<Thread, string>();
+        private readonly List<AlertBroadcast> alerts = new List<AlertBroadcast>();
+
+        public static RequestListener alerter;
+
         public RequestListener(ushort port)
         {
             tcpListener = new TcpListener(IPAddress.Any, port);
+            alerter = this;
+        }
+
+        public void RegisterUser(string username)
+        {
+            lock (users)
+            {
+                //TODO crashes if same thread logouts and logins in again
+                users.Add(Thread.CurrentThread, username);
+            }
+        }
+
+        public void SendAlerts<T>(T alert, params string[] receivers) where T : Alert
+        {
+            List<string> activeUsers = users.Values.Intersect(receivers).ToList();
+            lock (alerts)
+            {
+                alerts.Add(new AlertBroadcast(activeUsers, alert));
+            }
         }
 
         public void RegisterRequest<T>(Func<T, Response> callback)
@@ -56,6 +82,8 @@ namespace Server
 
                         watch.Restart();
                     }
+
+                    HandleAlerts(stream);
                 }
 
                 stream.Flush();
@@ -78,6 +106,56 @@ namespace Server
                 {
                     SendResponse(response, stream);
                 }              
+            }
+        }
+
+        private void HandleAlerts(NetworkStream stream)
+        {
+            string user = null;
+            lock (users)
+            {
+                if (users.ContainsKey(Thread.CurrentThread))
+                    user = users[Thread.CurrentThread];
+            }
+
+            if (user != null)
+            {
+
+                bool sentAlerts = false;
+
+                for (int i = 0; i < alerts.Count; i++)
+                {
+                    AlertBroadcast alertBroadcast = alerts[i];
+                    if (alertBroadcast == null)
+                        continue;
+
+                    bool shouldSend = false;
+                    lock (alertBroadcast)
+                    {
+                        shouldSend = alertBroadcast.Receivers.Contains(user);
+                    }
+
+                    if (shouldSend)
+                    {
+                        SendResponse(Response.From(alertBroadcast.Content), stream);
+                        Console.WriteLine("Sent an alert of type " + alertBroadcast.Content.GetType());
+                        sentAlerts = true;
+                    }
+                }
+
+                //Cleanup
+                if (sentAlerts)
+                {
+                    lock (alerts)
+                    {
+                        for (int i = alerts.Count - 1; i >= 0; i--)
+                        {
+                            alerts[i].Receivers.Remove(user);
+                            if (alerts[i].Receivers.Count == 0)
+                                alerts.RemoveAt(i);
+                        }
+                    }
+                }
             }
         }
 
@@ -109,5 +187,16 @@ namespace Server
             };
         }
 
+        public class AlertBroadcast
+        {
+            public List<string> Receivers { get; set; }
+            public object Content { get; set; }
+
+            public AlertBroadcast(List<string> receivers, Alert content)
+            {
+                Receivers = receivers;
+                Content = content;
+            }
+        }
     }
 }

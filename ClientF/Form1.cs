@@ -1,4 +1,5 @@
 ﻿using RequestLibrary;
+using RequestLibrary.Alerts;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,12 +16,14 @@ namespace ClientF
     public partial class Form1 : Form
     {
         User currUser;
-        RequestClient client = new RequestClient(IPAddress.Loopback, 57253);
+        RequestClient client;
         List<StarSystem> nearbySystems;
 
-        public Form1(User user)
+        public Form1(User user, RequestClient client)
         {
             currUser = user;
+            this.client = client;
+
             InitializeComponent();
         }
 
@@ -33,6 +36,13 @@ namespace ClientF
             BackgroundWorker bw = new BackgroundWorker();
             bw.DoWork += backgroundWorker1_DoWork;
             bw.RunWorkerCompleted += backgroundWorker1_RunWorkerCompleted;
+
+            client.SubscribeTo<TestAlert>(this, OnTestAlert);
+        }
+
+        private void OnTestAlert(TestAlert alert)
+        {
+            ChatBox.AppendText(alert.MessageFromServer);
         }
 
         private void FindAndDisplayNearbyStars()
@@ -40,7 +50,10 @@ namespace ClientF
             listView1.Items.Clear();
 
             FindJumpableSystemsRequest createReq = new FindJumpableSystemsRequest(currUser.position);
-            nearbySystems = client.SendRequest<StarSystemListWrapper>(createReq).systems;
+            lock (client)
+            {
+                nearbySystems = client.SendRequest<StarSystemListWrapper>(createReq).systems;
+            }
 
             foreach(StarSystem sys in nearbySystems)
             {
@@ -78,8 +91,6 @@ namespace ClientF
 
         private void button2_Click(object sender, EventArgs e)
         {
-            RequestClient client = new RequestClient(IPAddress.Loopback, 57253);
-
             ReadRequest req = new ReadRequest("got back from server woo");
 
             string temp = client.SendRequest<string>(req);
