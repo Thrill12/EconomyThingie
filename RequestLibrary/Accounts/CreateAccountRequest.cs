@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace RequestLibrary
+{
+    public class CreateAccountRequest
+    {
+
+        public string username;
+        public string password;
+
+        public CreateAccountRequest(string username, string password)
+        {
+            this.username = username;
+            this.password = password;
+        }
+    }
+}
