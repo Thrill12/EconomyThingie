@@ -18,7 +18,7 @@ namespace Server
         private Dictionary<Type, Func<object, Response>> registeredRequests = new Dictionary<Type, Func<object, Response>>();
         private TcpListener tcpListener;
 
-        private readonly Dictionary<Thread, string> users = new Dictionary<Thread, string>();
+        private readonly Dictionary<Thread, User> users = new Dictionary<Thread, User>();
         private readonly List<AlertBroadcast> alerts = new List<AlertBroadcast>();
 
         public static RequestListener alerter;
@@ -29,18 +29,18 @@ namespace Server
             alerter = this;
         }
 
-        public void RegisterUser(string username)
+        public void RegisterUser(User user)
         {
             lock (users)
             {
                 //TODO crashes if same thread logouts and logins in again
-                users.Add(Thread.CurrentThread, username);
+                users.Add(Thread.CurrentThread, user);
             }
         }
 
-        public void SendAlerts<T>(T alert, params string[] receivers) where T : Alert
+        public void SendAlerts<T>(T alert, params User[] receivers) where T : Alert
         {
-            List<string> activeUsers = users.Values.Intersect(receivers).ToList();
+            List<User> activeUsers = users.Values.Intersect(receivers).ToList();
             lock (alerts)
             {
                 alerts.Add(new AlertBroadcast(activeUsers, alert));
@@ -90,9 +90,18 @@ namespace Server
                 stream.Flush();
             }
 
-            ServerProgram sp = new ServerProgram();
-            //sp.RemoveFromLive();
             client.Close();
+
+            //Register user logout
+            if (users.ContainsKey(Thread.CurrentThread))
+            {
+                User user = users[Thread.CurrentThread];
+                lock (users)
+                {
+                    ServerProgram.liveUsers.Remove(user.seshID);
+                    users.Remove(Thread.CurrentThread);
+                }
+            }
         }
 
         private void HandleRequest(NetworkStream stream)
@@ -114,7 +123,7 @@ namespace Server
 
         private void HandleAlerts(NetworkStream stream)
         {
-            string user = null;
+            User user = null;
             lock (users)
             {
                 if (users.ContainsKey(Thread.CurrentThread))
@@ -194,10 +203,10 @@ namespace Server
 
         public class AlertBroadcast
         {
-            public List<string> Receivers { get; set; }
+            public List<User> Receivers { get; set; }
             public object Content { get; set; }
 
-            public AlertBroadcast(List<string> receivers, Alert content)
+            public AlertBroadcast(List<User> receivers, Alert content)
             {
                 Receivers = receivers;
                 Content = content;
