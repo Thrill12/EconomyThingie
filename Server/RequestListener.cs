@@ -145,7 +145,7 @@ namespace Server
                         bool shouldSend = false;
                         lock (alertBroadcast)
                         {
-                            shouldSend = alertBroadcast.Receivers.Contains(user);
+                            shouldSend = alertBroadcast.Receivers.Select(r => r.username).Contains(user.username);
                         }
 
                         if (shouldSend)
@@ -164,7 +164,7 @@ namespace Server
                     {
                         for (int i = alerts.Count - 1; i >= 0; i--)
                         {
-                            alerts[i].Receivers.Remove(user);
+                            alerts[i].Receivers.RemoveAll(r => r.username == user.username);
                             if (alerts[i].Receivers.Count == 0)
                                 alerts.RemoveAt(i);
                         }
