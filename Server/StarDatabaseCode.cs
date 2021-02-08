@@ -188,6 +188,25 @@ namespace Server
             }                
         }
 
+        public static List<User> GetUsersInSystem(StarSystem sysName)
+        {
+            string selectStartSystemCommand = $"SELECT * FROM users WHERE sysid = {sysName.ID}";
+            using var cmd = new SQLiteCommand(selectStartSystemCommand, StarDatabaseCode.sqlite_conn);
+            using SQLiteDataReader rdr = cmd.ExecuteReader();
+
+            User userToFetch;
+            List<User> usersInSystem = new List<User>();
+
+            while (rdr.Read())
+            {
+                userToFetch = new User(rdr.GetInt32(0), rdr.GetString(1), rdr.GetString(2), rdr.GetInt32(3), rdr.GetInt32(4), rdr.GetInt32(5));
+                PopPosSystem(userToFetch);
+                usersInSystem.Add(userToFetch);
+            }
+
+            return usersInSystem;
+        }
+
         public static User GetWholeUser(string username)
         {
             SQLiteCommand user = StarDatabaseCode.sqlite_conn.CreateCommand();
@@ -253,7 +272,7 @@ namespace Server
 
         public static StarSystem FindSystemByID(int id)
         {
-            string selectStartSystemCommand = $"SELECT * FROM starsystems WHERE _id = '{id}'";
+            string selectStartSystemCommand = $"SELECT * FROM starsystems WHERE _id = {id}";
             using var cmd = new SQLiteCommand(selectStartSystemCommand, StarDatabaseCode.sqlite_conn);
             using SQLiteDataReader rdr = cmd.ExecuteReader();
 

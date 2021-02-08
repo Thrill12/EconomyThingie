@@ -1,5 +1,6 @@
 ﻿using RequestLibrary;
 using RequestLibrary.Alerts;
+using RequestLibrary.Form;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,6 +19,7 @@ namespace ClientF
         User currUser;
         RequestClient client;
         List<StarSystem> nearbySystems;
+        List<User> localPlayers;
 
         public Form1(User user, RequestClient client)
         {
@@ -31,23 +33,45 @@ namespace ClientF
         {           
             StartTimer();
             RefreshForm();
-            FindAndDisplayNearbyStars();           
+            FindAndDisplayNearbyStars();
+            FindAndDisplayLocalPlayers();
 
             BackgroundWorker bw = new BackgroundWorker();
             bw.DoWork += backgroundWorker1_DoWork;
             bw.RunWorkerCompleted += backgroundWorker1_RunWorkerCompleted;
 
-            client.SubscribeTo<TestAlert>(this, OnTestAlert);
+            client.SubscribeTo<TestAlert>(this, OnAlert);
         }
 
-        private void OnTestAlert(TestAlert alert)
+        private void OnAlert(TestAlert alert)
         {
-            ChatBox.AppendText(alert.MessageFromServer);
+            ChatBox.AppendText(alert.MessageFromServer + "\n");
+            ChatBox.SelectionStart = ChatBox.Text.Length;
+            ChatBox.ScrollToCaret();
+        }
+
+        private void FindAndDisplayLocalPlayers()
+        {
+            LocalPlayers.Items.Clear();
+
+            FindLocalPlayersRequest createReq = new FindLocalPlayersRequest(currUser.position);
+            lock (client)
+            {
+                localPlayers = client.SendRequest<LocalPlayersListWrapper>(createReq).users;
+            }
+
+            foreach(User u in localPlayers)
+            {
+                ListViewItem item = new ListViewItem();
+                item.Text = u.username;
+                item.Tag = u;
+                LocalPlayers.Items.Add(item);
+            }
         }
 
         private void FindAndDisplayNearbyStars()
         {
-            listView1.Items.Clear();
+            JumpableSystems.Items.Clear();
 
             FindJumpableSystemsRequest createReq = new FindJumpableSystemsRequest(currUser.position);
             lock (client)
@@ -60,7 +84,7 @@ namespace ClientF
                 ListViewItem item = new ListViewItem();
                 item.Text = sys.name + " - " + sys.starClass;
                 item.Tag = sys;
-                listView1.Items.Add(item);
+                JumpableSystems.Items.Add(item);
             }
         }
 
@@ -69,15 +93,25 @@ namespace ClientF
             lock (client)
             {
                 currUser.position = (StarSystem)e.Item.Tag;
-                RefreshForm();
+                ChatBox.AppendText("Entered system " + currUser.position.name + "\n");
                 SendUpdateToServer();
+                RefreshForm();      
             }        
         }
 
         private void RefreshForm()
         {
             currUser.positionID = currUser.position.ID;
-            FindAndDisplayNearbyStars();
+            lock (this)
+            {
+                FindAndDisplayNearbyStars();
+            }
+
+            lock (this)
+            {
+                FindAndDisplayLocalPlayers();
+            }
+            
 
             lock (this)
             {
@@ -87,6 +121,11 @@ namespace ClientF
                 GCBox.Text = currUser.galacticCredits.ToString();
                 DWBox.Text = currUser.diplomaticWeight.ToString();
             }            
+        }
+
+        private void LocalPlayers_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -106,6 +145,17 @@ namespace ClientF
         private void label1_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void ChatBoxInput_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                SendChatRequest chatReq = new SendChatRequest(ChatBoxInput.Text);
+                ChatBoxInput.Clear();
+                
+                client.SendRequest(chatReq, currUser);
+            }
         }
 
         private void button1_Click_1(object sender, EventArgs e)
@@ -153,23 +203,13 @@ namespace ClientF
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
             SendUpdateToServer();
-            System.Threading.Thread.Sleep(1000);
+            System.Threading.Thread.Sleep(500);
         }
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             RefreshForm();
         }
-
-        #endregion
-
-        private void ChatBoxInput_KeyDown(object sender, KeyEventArgs e)
-        {
-            if(e.KeyCode == Keys.Enter)
-            {
-                ChatBox.AppendText(ChatBoxInput.Text);
-                ChatBoxInput.Clear();
-            }
-        }
+        #endregion    
     }
 }

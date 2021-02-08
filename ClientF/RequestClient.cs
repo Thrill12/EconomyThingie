@@ -11,6 +11,8 @@ using Server;
 using System.Threading;
 using RequestLibrary;
 using System.Windows.Threading;
+using System.Diagnostics;
+using RequestLibrary.Accounts;
 
 namespace ClientF
 {
@@ -63,16 +65,53 @@ namespace ClientF
             }
         }
 
-        public T SendRequest<T>(object request)
+        public void SendRequest(AuthenticatedRequest request, User user)
         {
+            request.name = user.username;
+            request.seshID = user.seshID;
+            request.sysID = user.positionID;
             SendRequest(request);
+            
+            
+        }
 
-            while (responses.Count == 0) ;
+        public T SendRequest<T>(AuthenticatedRequest request, User user) where T : class
+        {
+            request.name = user.username;
+            request.seshID = user.seshID;
+            request.sysID = user.positionID;
+            SendRequest(request);
+            Stopwatch timer = Stopwatch.StartNew();
+
+            while (responses.Count == 0)
+            {
+                if (timer.ElapsedMilliseconds > 3000)
+                {
+                    return SendRequest<T>(request);
+                }
+            }
             lock (responses)
             {
                 return (T)responses.Dequeue();
             }
-        
+        }
+
+        public T SendRequest<T>(object request) where T:class
+        {
+            SendRequest(request);
+            Stopwatch timer = Stopwatch.StartNew();
+
+            while (responses.Count == 0)
+            {
+                if(timer.ElapsedMilliseconds > 3000)
+                {
+                    return SendRequest<T>(request);
+                }
+            }
+            lock (responses)
+            {
+                return (T)responses.Dequeue();
+            }       
         }
 
         private void ReceivePackets(object obj)

@@ -5,10 +5,11 @@ using System.Data.SQLite;
 using System.Text;
 using RequestLibrary;
 using System.IO;
+using RequestLibrary.Form;
 
 namespace Server
 {
-    class ServerProgram
+    public class ServerProgram
     {
         public static Dictionary<string, User> liveUsers = new Dictionary<string, User>();
 
@@ -45,11 +46,18 @@ namespace Server
             listener.RegisterRequest<CreateAccountRequest>(RequestHandlers.CreateAccountRequestHandler);
             listener.RegisterRequest<UpdateClientOnServerRequest>(RequestHandlers.UpdateClientOnServerRequestHandler);
             listener.RegisterRequest<FindJumpableSystemsRequest>(RequestHandlers.FindJumpableSystemsRequestHandler);
+            listener.RegisterRequest<FindLocalPlayersRequest>(RequestHandlers.FindLocalPlayersRequestHandler);
             listener.RegisterRequest<SendChatRequest>(RequestHandlers.SendChatRequestHandler);
+            
 
             Console.WriteLine("Server initiated...");
 
             listener.StartListening();        
-        }     
+        }   
+        
+        public void RemoveFromLive(User user)
+        {
+            liveUsers.Remove(user.seshID);
+        }
     }
 }

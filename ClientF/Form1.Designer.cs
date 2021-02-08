@@ -37,10 +37,12 @@
             this.ADDGC = new System.Windows.Forms.Button();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.ADDDW = new System.Windows.Forms.Button();
-            this.listView1 = new System.Windows.Forms.ListView();
+            this.JumpableSystems = new System.Windows.Forms.ListView();
             this.Star_Name = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.ChatBox = new System.Windows.Forms.RichTextBox();
             this.ChatBoxInput = new System.Windows.Forms.RichTextBox();
+            this.LocalPlayers = new System.Windows.Forms.ListView();
+            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
             // UsernameBox
@@ -146,23 +148,24 @@
             this.ADDDW.UseVisualStyleBackColor = true;
             this.ADDDW.Click += new System.EventHandler(this.button3_Click);
             // 
-            // listView1
+            // JumpableSystems
             // 
-            this.listView1.Alignment = System.Windows.Forms.ListViewAlignment.SnapToGrid;
-            this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.listView1.AutoArrange = false;
-            this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.JumpableSystems.Activation = System.Windows.Forms.ItemActivation.TwoClick;
+            this.JumpableSystems.Alignment = System.Windows.Forms.ListViewAlignment.SnapToGrid;
+            this.JumpableSystems.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.JumpableSystems.AutoArrange = false;
+            this.JumpableSystems.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.Star_Name});
-            this.listView1.FullRowSelect = true;
-            this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(755, 303);
-            this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(129, 246);
-            this.listView1.Sorting = System.Windows.Forms.SortOrder.Ascending;
-            this.listView1.TabIndex = 10;
-            this.listView1.UseCompatibleStateImageBehavior = false;
-            this.listView1.View = System.Windows.Forms.View.List;
-            this.listView1.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.listView1_ItemSelectionChanged);
+            this.JumpableSystems.FullRowSelect = true;
+            this.JumpableSystems.HideSelection = false;
+            this.JumpableSystems.Location = new System.Drawing.Point(755, 303);
+            this.JumpableSystems.Name = "JumpableSystems";
+            this.JumpableSystems.Size = new System.Drawing.Size(129, 100);
+            this.JumpableSystems.Sorting = System.Windows.Forms.SortOrder.Ascending;
+            this.JumpableSystems.TabIndex = 10;
+            this.JumpableSystems.UseCompatibleStateImageBehavior = false;
+            this.JumpableSystems.View = System.Windows.Forms.View.List;
+            this.JumpableSystems.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.listView1_ItemSelectionChanged);
             // 
             // Star_Name
             // 
@@ -183,21 +186,49 @@
             // 
             // ChatBoxInput
             // 
+            this.ChatBoxInput.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.ChatBoxInput.Location = new System.Drawing.Point(12, 521);
+            this.ChatBoxInput.Multiline = false;
             this.ChatBoxInput.Name = "ChatBoxInput";
             this.ChatBoxInput.Size = new System.Drawing.Size(737, 28);
             this.ChatBoxInput.TabIndex = 12;
             this.ChatBoxInput.Text = "";
             this.ChatBoxInput.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ChatBoxInput_KeyDown);
             // 
+            // LocalPlayers
+            // 
+            this.LocalPlayers.Alignment = System.Windows.Forms.ListViewAlignment.SnapToGrid;
+            this.LocalPlayers.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.LocalPlayers.AutoArrange = false;
+            this.LocalPlayers.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader1});
+            this.LocalPlayers.FullRowSelect = true;
+            this.LocalPlayers.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
+            this.LocalPlayers.Location = new System.Drawing.Point(755, 413);
+            this.LocalPlayers.MultiSelect = false;
+            this.LocalPlayers.Name = "LocalPlayers";
+            this.LocalPlayers.Size = new System.Drawing.Size(129, 100);
+            this.LocalPlayers.Sorting = System.Windows.Forms.SortOrder.Ascending;
+            this.LocalPlayers.TabIndex = 13;
+            this.LocalPlayers.UseCompatibleStateImageBehavior = false;
+            this.LocalPlayers.View = System.Windows.Forms.View.List;
+            this.LocalPlayers.SelectedIndexChanged += new System.EventHandler(this.LocalPlayers_SelectedIndexChanged);
+            // 
+            // columnHeader1
+            // 
+            this.columnHeader1.Text = "Name";
+            this.columnHeader1.Width = 100;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1034, 561);
+            this.Controls.Add(this.LocalPlayers);
             this.Controls.Add(this.ChatBoxInput);
             this.Controls.Add(this.ChatBox);
-            this.Controls.Add(this.listView1);
+            this.Controls.Add(this.JumpableSystems);
             this.Controls.Add(this.ADDDW);
             this.Controls.Add(this.ADDGC);
             this.Controls.Add(this.PositionBox);
@@ -226,10 +257,12 @@
         private System.Windows.Forms.Button ADDGC;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private System.Windows.Forms.Button ADDDW;
-        private System.Windows.Forms.ListView listView1;
+        private System.Windows.Forms.ListView JumpableSystems;
         private System.Windows.Forms.ColumnHeader Star_Name;
         private System.Windows.Forms.RichTextBox ChatBox;
         private System.Windows.Forms.RichTextBox ChatBoxInput;
+        private System.Windows.Forms.ListView LocalPlayers;
+        private System.Windows.Forms.ColumnHeader columnHeader1;
     }
 }
 

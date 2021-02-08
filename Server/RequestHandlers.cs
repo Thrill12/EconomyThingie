@@ -1,5 +1,6 @@
 ﻿using RequestLibrary;
 using RequestLibrary.Alerts;
+using RequestLibrary.Form;
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
@@ -122,10 +123,7 @@ namespace Server
         }
 
         public static Response UpdateClientOnServerRequestHandler(UpdateClientOnServerRequest arg)
-        {
-            RequestListener.alerter.SendAlerts(new TestAlert("Hello"), arg.user.username);
-
-
+        {         
             string command = $"UPDATE users SET galacticcredits={arg.user.galacticCredits} WHERE username='{arg.user.username}'";
             using var cmd = new SQLiteCommand(command, StarDatabaseCode.sqlite_conn);
             cmd.ExecuteNonQuery();
@@ -148,9 +146,26 @@ namespace Server
             return Response.From(wrapper);
         }
 
+        public static Response FindLocalPlayersRequestHandler(FindLocalPlayersRequest arg)
+        {
+            LocalPlayersListWrapper wrapper = new LocalPlayersListWrapper(StarDatabaseCode.GetUsersInSystem(StarDatabaseCode.FindSystemByID(arg.startSystem.ID)));
+
+            return Response.From(wrapper);
+        }
+
         public static Response SendChatRequestHandler(SendChatRequest arg)
         {
-            return null;
+            List<User> usersInSystem = StarDatabaseCode.GetUsersInSystem(StarDatabaseCode.FindSystemByID(arg.sysID));
+
+            foreach(User u in usersInSystem)
+            {
+                if(arg.textToSend.Trim() != "")
+                {
+                    RequestListener.alerter.SendAlerts(new TestAlert(arg.name + ": " + arg.textToSend), u.username);
+                }                
+            }            
+
+            return Response.Ok();
         }
 
         public static string CreateSessionID(string name, DateTime time)

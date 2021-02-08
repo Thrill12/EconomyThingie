@@ -56,6 +56,7 @@ namespace Server
         public void StartListening()
         {
             tcpListener.Start();
+            Console.WriteLine("Server is listening...");
 
             while (true)
             {
@@ -89,6 +90,8 @@ namespace Server
                 stream.Flush();
             }
 
+            ServerProgram sp = new ServerProgram();
+            //sp.RemoveFromLive();
             client.Close();
         }
 
@@ -120,28 +123,30 @@ namespace Server
 
             if (user != null)
             {
-
                 bool sentAlerts = false;
 
-                for (int i = 0; i < alerts.Count; i++)
+                lock (alerts)
                 {
-                    AlertBroadcast alertBroadcast = alerts[i];
-                    if (alertBroadcast == null)
-                        continue;
-
-                    bool shouldSend = false;
-                    lock (alertBroadcast)
+                    for (int i = 0; i < alerts.Count; i++)
                     {
-                        shouldSend = alertBroadcast.Receivers.Contains(user);
-                    }
+                        AlertBroadcast alertBroadcast = alerts[i];
+                        if (alertBroadcast == null)
+                            continue;
 
-                    if (shouldSend)
-                    {
-                        SendResponse(Response.From(alertBroadcast.Content), stream);
-                        Console.WriteLine("Sent an alert of type " + alertBroadcast.Content.GetType());
-                        sentAlerts = true;
+                        bool shouldSend = false;
+                        lock (alertBroadcast)
+                        {
+                            shouldSend = alertBroadcast.Receivers.Contains(user);
+                        }
+
+                        if (shouldSend)
+                        {
+                            SendResponse(Response.From(alertBroadcast.Content), stream);
+                            Console.WriteLine("Sent an alert of type " + alertBroadcast.Content.GetType());
+                            sentAlerts = true;
+                        }
                     }
-                }
+                }               
 
                 //Cleanup
                 if (sentAlerts)

@@ -25,9 +25,7 @@ namespace ClientF
         private void button1_Click(object sender, EventArgs e)
         {
             string username = UsernameBox.Text;
-            string password = PasswordBox.Text;
-
-            
+            string password = PasswordBox.Text;            
 
             LoginRequest logReq = new LoginRequest(username, password);
             User chk = client.SendRequest<User>(logReq);
