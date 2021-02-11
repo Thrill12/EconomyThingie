@@ -4,6 +4,7 @@ using RequestLibrary.Form;
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -57,7 +58,7 @@ namespace Server
                 liveUsers.Add(currentUser.seshID, currentUser);
 
                 StarDatabaseCode.InsertUser(currentUser);
-                RequestListener.alerter.RegisterUser(currentUser.username);
+                RequestListener.alerter.RegisterUser(currentUser);
                 return Response.From(currentUser);
             }
         }
@@ -101,7 +102,7 @@ namespace Server
                         currUser.seshID = CreateSessionID(currUser.username, DateTime.Now);
                         liveUsers.Add(currUser.seshID, currUser);
 
-                        RequestListener.alerter.RegisterUser(currUser.username);
+                        RequestListener.alerter.RegisterUser(currUser);
                         return Response.From(currUser);
                     }
                     else
@@ -134,9 +135,11 @@ namespace Server
             using var cmddd = new SQLiteCommand(command, StarDatabaseCode.sqlite_conn);
             cmddd.ExecuteNonQuery();
 
+            ServerProgram.liveUsers[arg.user.seshID] = arg.user;
+
             Console.WriteLine(arg.user.username + "'s data has been updated - " + DateTime.Now.ToString("G"));           
 
-            return Response.From(arg.user);
+            return Response.From(ServerProgram.liveUsers[arg.user.seshID]);
         }
 
         public static Response FindJumpableSystemsRequestHandler(FindJumpableSystemsRequest arg)
@@ -148,7 +151,11 @@ namespace Server
 
         public static Response FindLocalPlayersRequestHandler(FindLocalPlayersRequest arg)
         {
-            LocalPlayersListWrapper wrapper = new LocalPlayersListWrapper(StarDatabaseCode.GetUsersInSystem(StarDatabaseCode.FindSystemByID(arg.startSystem.ID)));
+            //LocalPlayersListWrapper wrapper = new LocalPlayersListWrapper(StarDatabaseCode.GetUsersInSystem(StarDatabaseCode.FindSystemByID(arg.startSystem.ID)));
+
+            List<User> nearbyUsers = ServerProgram.liveUsers.Values.Where(x => x.position.ID == arg.startSystem.ID).ToList();
+
+            LocalPlayersListWrapper wrapper = new LocalPlayersListWrapper(nearbyUsers);
 
             return Response.From(wrapper);
         }
@@ -161,7 +168,7 @@ namespace Server
             {
                 if(arg.textToSend.Trim() != "")
                 {
-                    RequestListener.alerter.SendAlerts(new TestAlert(arg.name + ": " + arg.textToSend), u.username);
+                    RequestListener.alerter.SendAlerts(new TestAlert(arg.name + ": " + arg.textToSend), u);
                 }                
             }            
 

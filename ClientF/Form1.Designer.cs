@@ -205,6 +205,7 @@
             this.columnHeader1});
             this.LocalPlayers.FullRowSelect = true;
             this.LocalPlayers.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
+            this.LocalPlayers.HideSelection = false;
             this.LocalPlayers.Location = new System.Drawing.Point(755, 413);
             this.LocalPlayers.MultiSelect = false;
             this.LocalPlayers.Name = "LocalPlayers";

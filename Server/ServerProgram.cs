@@ -40,6 +40,8 @@ namespace Server
 
             RequestListener listener = new RequestListener(57253);
 
+            #region Request Registering
+
             listener.RegisterRequest<LoginRequest>(RequestHandlers.LoginRequestHandler);
             listener.RegisterRequest<WriteRequest>(RequestHandlers.WriteRequestHandler);
             listener.RegisterRequest<ReadRequest>(RequestHandlers.ReadRequestHandler);
@@ -48,9 +50,8 @@ namespace Server
             listener.RegisterRequest<FindJumpableSystemsRequest>(RequestHandlers.FindJumpableSystemsRequestHandler);
             listener.RegisterRequest<FindLocalPlayersRequest>(RequestHandlers.FindLocalPlayersRequestHandler);
             listener.RegisterRequest<SendChatRequest>(RequestHandlers.SendChatRequestHandler);
-            
 
-            Console.WriteLine("Server initiated...");
+            #endregion
 
             listener.StartListening();        
         }   

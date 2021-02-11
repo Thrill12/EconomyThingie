@@ -70,9 +70,7 @@ namespace ClientF
             request.name = user.username;
             request.seshID = user.seshID;
             request.sysID = user.positionID;
-            SendRequest(request);
-            
-            
+            SendRequest(request);          
         }
 
         public T SendRequest<T>(AuthenticatedRequest request, User user) where T : class
@@ -85,7 +83,7 @@ namespace ClientF
 
             while (responses.Count == 0)
             {
-                if (timer.ElapsedMilliseconds > 3000)
+                if (timer.ElapsedMilliseconds > 1000)
                 {
                     return SendRequest<T>(request);
                 }
@@ -128,10 +126,13 @@ namespace ClientF
 
                         if (type.IsSubclassOf(typeof(Alert)) && callbacks.ContainsKey(type))
                         {
-                            foreach (var x in callbacks[type].Values)
+                            lock (callbacks)
                             {
-                                foreach (var callback in x)
-                                    dispatcher.Invoke(() => callback(data));
+                                foreach (var x in callbacks[type].Values)
+                                {
+                                    foreach (var callback in x)
+                                        dispatcher.InvokeAsync(() => callback(data));
+                                }
                             }
                         }
                         else
@@ -154,21 +155,27 @@ namespace ClientF
         {
             Action<object> wrappedCallback = (o) => callback((T)o);
 
-            if (!callbacks.ContainsKey(typeof(T)))
-                callbacks.Add(typeof(T), new Dictionary<object, List<Action<object>>>());
+            lock (callbacks)
+            {
+                if (!callbacks.ContainsKey(typeof(T)))
+                    callbacks.Add(typeof(T), new Dictionary<object, List<Action<object>>>());
 
-            if (!callbacks[typeof(T)].ContainsKey(sender))
-                callbacks[typeof(T)].Add(sender, new List<Action<object>>());
+                if (!callbacks[typeof(T)].ContainsKey(sender))
+                    callbacks[typeof(T)].Add(sender, new List<Action<object>>());
 
-            callbacks[typeof(T)][sender].Add(wrappedCallback);
+                callbacks[typeof(T)][sender].Add(wrappedCallback);
+            }
         }
 
         public void Unsubscribe(object sender)
         {
-            foreach (var type in callbacks.Values)
+            lock (callbacks)
             {
-                if (type.ContainsKey(sender))
-                    type.Remove(sender);
+                foreach (var type in callbacks.Values)
+                {
+                    if (type.ContainsKey(sender))
+                        type.Remove(sender);
+                }
             }
         }
 
