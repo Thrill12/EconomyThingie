@@ -70,9 +70,7 @@ namespace ClientF
             request.name = user.username;
             request.seshID = user.seshID;
             request.sysID = user.positionID;
-            SendRequest(request);
-            
-            
+            SendRequest(request);          
         }
 
         public T SendRequest<T>(AuthenticatedRequest request, User user) where T : class
@@ -85,7 +83,7 @@ namespace ClientF
 
             while (responses.Count == 0)
             {
-                if (timer.ElapsedMilliseconds > 3000)
+                if (timer.ElapsedMilliseconds > 1000)
                 {
                     return SendRequest<T>(request);
                 }

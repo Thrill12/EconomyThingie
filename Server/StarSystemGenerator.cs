@@ -20,6 +20,8 @@ namespace Server
         {
             Stopwatch watch = Stopwatch.StartNew();
 
+            Console.WriteLine("Started systems...");
+
             for (int i = 0; i < 10000; i++)
             {
                 CreateNewSystem();
@@ -93,6 +95,8 @@ namespace Server
 
         public void CreateHyperlanes()
         {
+            Console.WriteLine("Started Hyperlanes...");
+
             List<Hyperlane> existingLanes = new List<Hyperlane>();
 
             StarSystem sys1;

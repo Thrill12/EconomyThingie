@@ -110,8 +110,7 @@ namespace ClientF
             lock (this)
             {
                 FindAndDisplayLocalPlayers();
-            }
-            
+            }    
 
             lock (this)
             {
