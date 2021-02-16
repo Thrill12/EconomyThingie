@@ -75,7 +75,7 @@ namespace Server
 
             using (NetworkStream stream = client.GetStream())
             {
-                while (watch.ElapsedMilliseconds <= timeout)
+                while (watch.ElapsedMilliseconds <= timeout && client.Connected)
                 {
                     if (stream.DataAvailable)
                     {

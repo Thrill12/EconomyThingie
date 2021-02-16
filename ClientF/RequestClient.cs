@@ -83,7 +83,7 @@ namespace ClientF
 
             while (responses.Count == 0)
             {
-                if (timer.ElapsedMilliseconds > 1000)
+                if (timer.ElapsedMilliseconds > 5000)
                 {
                     return SendRequest<T>(request);
                 }
@@ -101,7 +101,7 @@ namespace ClientF
 
             while (responses.Count == 0)
             {
-                if(timer.ElapsedMilliseconds > 3000)
+                if(timer.ElapsedMilliseconds > 5000)
                 {
                     return SendRequest<T>(request);
                 }

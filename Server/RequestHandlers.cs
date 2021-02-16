@@ -98,9 +98,18 @@ namespace Server
                             StarSystem savedPos = new StarSystem(rdr.GetInt32(0), rdr.GetString(1), rdr.GetInt32(2), rdr.GetInt32(3), rdr.GetInt32(4));
                             currUser.position = savedPos;
                         }
+                        rdr.Close();
 
                         currUser.seshID = CreateSessionID(currUser.username, DateTime.Now);
-                        liveUsers.Add(currUser.seshID, currUser);
+
+                        if (!liveUsers.ContainsKey(currUser.seshID))
+                        {
+                            liveUsers.Add(currUser.seshID, currUser);
+                        }
+                        else
+                        {
+                            liveUsers[currUser.seshID] = currUser;
+                        }
 
                         RequestListener.alerter.RegisterUser(currUser);
                         return Response.From(currUser);
@@ -135,9 +144,19 @@ namespace Server
             using var cmddd = new SQLiteCommand(command, StarDatabaseCode.sqlite_conn);
             cmddd.ExecuteNonQuery();
 
+            bool x = liveUsers.Keys.First() == arg.user.seshID;
+
             ServerProgram.liveUsers[arg.user.seshID] = arg.user;
 
-            Console.WriteLine(arg.user.username + "'s data has been updated - " + DateTime.Now.ToString("G"));           
+            Console.WriteLine(arg.user.username + "'s data has been updated - " + DateTime.Now.ToString("G"));
+
+
+            foreach(User user in liveUsers.Values)
+            {
+                Console.WriteLine(user.seshID + " : " + user.username);
+            }
+
+            Console.WriteLine(liveUsers.Count + " users are live");
 
             return Response.From(ServerProgram.liveUsers[arg.user.seshID]);
         }

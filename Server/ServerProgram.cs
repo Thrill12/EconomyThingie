@@ -53,6 +53,7 @@ namespace Server
 
             #endregion
 
+            Console.WriteLine("Started Listening");
             listener.StartListening();        
         }   
         
