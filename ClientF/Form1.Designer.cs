@@ -43,6 +43,7 @@
             this.ChatBoxInput = new System.Windows.Forms.RichTextBox();
             this.LocalPlayers = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.ShipTestingDisplay = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
             // 
             // UsernameBox
@@ -221,11 +222,21 @@
             this.columnHeader1.Text = "Name";
             this.columnHeader1.Width = 100;
             // 
+            // ShipTestingDisplay
+            // 
+            this.ShipTestingDisplay.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.ShipTestingDisplay.Location = new System.Drawing.Point(755, 80);
+            this.ShipTestingDisplay.Name = "ShipTestingDisplay";
+            this.ShipTestingDisplay.Size = new System.Drawing.Size(129, 217);
+            this.ShipTestingDisplay.TabIndex = 14;
+            this.ShipTestingDisplay.Text = "";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1034, 561);
+            this.Controls.Add(this.ShipTestingDisplay);
             this.Controls.Add(this.LocalPlayers);
             this.Controls.Add(this.ChatBoxInput);
             this.Controls.Add(this.ChatBox);
@@ -239,7 +250,7 @@
             this.Controls.Add(this.GCLabel);
             this.Controls.Add(this.UsernameBox);
             this.MaximumSize = new System.Drawing.Size(1050, 600);
-            this.MinimumSize = new System.Drawing.Size(640, 390);
+            this.MinimumSize = new System.Drawing.Size(1050, 600);
             this.Name = "Form1";
             this.Text = "SEND";
             this.Load += new System.EventHandler(this.Form1_Load);
@@ -264,6 +275,7 @@
         private System.Windows.Forms.RichTextBox ChatBoxInput;
         private System.Windows.Forms.ListView LocalPlayers;
         private System.Windows.Forms.ColumnHeader columnHeader1;
+        private System.Windows.Forms.RichTextBox ShipTestingDisplay;
     }
 }
 

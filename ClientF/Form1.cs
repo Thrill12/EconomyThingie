@@ -40,13 +40,12 @@ namespace ClientF
             bw.DoWork += backgroundWorker1_DoWork;
             bw.RunWorkerCompleted += backgroundWorker1_RunWorkerCompleted;
 
-            client.SubscribeTo<TestAlert>(this, OnAlert);
+            client.SubscribeTo<ChatAlert>(this, OnAlert);
         }
 
-        private void OnAlert(TestAlert alert)
+        private void OnAlert(ChatAlert alert)
         {
-            ChatBox.AppendText(alert.MessageFromServer + "\n");
-            ChatBox.SelectionStart = ChatBox.Text.Length;
+            ChatBox.AppendText(alert.messageToSend + "\n");
             ChatBox.ScrollToCaret();
         }
 
@@ -119,6 +118,13 @@ namespace ClientF
                 PositionBox.Text = currUser.position.name;
                 GCBox.Text = currUser.galacticCredits.ToString();
                 DWBox.Text = currUser.diplomaticWeight.ToString();
+
+                ShipTestingDisplay.Clear();
+                ShipTestingDisplay.AppendText((currUser.equippedShip.id + "\n").ToString());
+                ShipTestingDisplay.AppendText((currUser.equippedShip.cargoLimit + "\n").ToString());
+                ShipTestingDisplay.AppendText((currUser.equippedShip.crewCap + "\n").ToString());
+                ShipTestingDisplay.AppendText((currUser.equippedShip.health + "\n").ToString());
+                ShipTestingDisplay.AppendText((currUser.equippedShip.QELimit + "\n").ToString());
             }            
         }
 
@@ -150,10 +156,11 @@ namespace ClientF
         {
             if (e.KeyCode == Keys.Enter)
             {
-                SendChatRequest chatReq = new SendChatRequest(ChatBoxInput.Text);
-                ChatBoxInput.Clear();
-                
+                SendChatRequest chatReq = new SendChatRequest(ChatBoxInput.Text);               
                 client.SendRequest(chatReq, currUser);
+                ChatBoxInput.Clear();
+                ChatBox.SelectionStart = ChatBox.Text.Length;
+                ChatBox.ScrollToCaret();
             }
         }
 

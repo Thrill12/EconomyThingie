@@ -1,4 +1,5 @@
 ﻿using RequestLibrary;
+using RequestLibrary.ObjectClasses.Artificial.ShipThings.Ships;
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
@@ -52,6 +53,7 @@ namespace Server
                                                                     sysid INTEGER,
                                                                     size INTEGER,
                                                                     biome VARCHAR(20),
+
                                                                     FOREIGN KEY (sysid)
                                                                         REFERENCES starsystems(id)
                                                                             ON DELETE CASCADE
@@ -77,10 +79,29 @@ namespace Server
                                                                     sysid INTEGER,                                                            
                                                                     galacticcredits INTEGER,    
                                                                     diplomaticweight INTEGER,
+                                                                    currentship INTEGER,
 
                                                                     FOREIGN KEY (sysid)
                                                                         REFERENCES starsystems(id)
-                                                                            ON UPDATE NO ACTION)";
+                                                                            ON UPDATE NO ACTION,
+
+                                                                    FOREIGN KEY (currentship)
+                                                                        REFERENCES ships(id)
+                                                                            ON DELETE CASCADE)";
+            string CreateShipsTable = @"CREATE TABLE IF NOT EXISTS ships(
+                                                                    _id INTEGER PRIMARY KEY,
+                                                                    health INTEGER,
+                                                                    shield INTEGER,
+                                                                    cargolimit INTEGER,
+                                                                    weight INTEGER,
+                                                                    qelimit REAL,
+                                                                    energy REAL,
+                                                                    owner INTEGER,
+                                                                    shiptype VARCHAR(50),
+                                                                    
+                                                                    FOREIGN KEY (owner)
+                                                                            REFERENCES users(id)
+                                                                                ON UPDATE NO ACTION)";
 
             sqlite_cmd = conn.CreateCommand();
             sqlite_cmd.CommandText = CreateSystemTable;
@@ -90,6 +111,8 @@ namespace Server
             sqlite_cmd.CommandText = CreateHyperlanesTable;
             sqlite_cmd.ExecuteNonQuery();
             sqlite_cmd.CommandText = CreateUsersTable;
+            sqlite_cmd.ExecuteNonQuery();
+            sqlite_cmd.CommandText = CreateShipsTable;
             sqlite_cmd.ExecuteNonQuery();
         }
 
@@ -182,10 +205,82 @@ namespace Server
 
             if (count == 0)
             {
-                addUser.CommandText = $@"INSERT INTO users(username, password, sysid, galacticcredits, diplomaticweight)
-                                                            VALUES('{user.username}', '{user.password}', 1, 1000, 0);";
+                addUser.CommandText = $@"INSERT INTO users(username, password, sysid, galacticcredits, diplomaticweight, currentship)
+                                                            VALUES('{user.username}', '{user.password}', 1, 1000, 0, {user.equippedShip.id});";
                 addUser.ExecuteNonQuery();
             }                
+        }
+
+        public static void InsertShip(BaseShip shipToInsert, User shipOwner)
+        {
+            SQLiteCommand addShip;
+            addShip = sqlite_conn.CreateCommand();
+
+            string chkShp = $"SELECT COUNT(*) FROM ships WHERE _id='{shipToInsert.id}'";
+            using var cmd = new SQLiteCommand(chkShp, sqlite_conn);
+            using SQLiteDataReader rdr = cmd.ExecuteReader();
+
+            int count = 0;
+
+            while (rdr.Read())
+            {
+                count = rdr.GetInt32(0);
+            }
+
+            if(count == 0)
+            {
+                addShip.CommandText = $@"INSERT INTO ships(health, shield, cargolimit, weight, qelimit, energy, owner) 
+                                                                            VALUES(
+                                                                                    {shipOwner.equippedShip.health}, 
+                                                                                    {shipOwner.equippedShip.shield},
+                                                                                    {shipOwner.equippedShip.cargoLimit},
+                                                                                    {shipOwner.equippedShip.weight},
+                                                                                    {shipOwner.equippedShip.QELimit},
+                                                                                    {shipOwner.equippedShip.energy},
+                                                                                    {shipOwner.id})";
+                addShip.ExecuteNonQuery();
+            }
+        }
+
+        public static BaseShip SetProgramIDOfShip(BaseShip ship)
+        {
+            SQLiteCommand checkID;
+            checkID = sqlite_conn.CreateCommand();
+
+            string chkStr = $"SELECT _id FROM ships WHERE owner={ship.ownerID}";
+            using var cmd = new SQLiteCommand(chkStr, sqlite_conn);
+            using SQLiteDataReader rdr = cmd.ExecuteReader();
+
+            int idToChange = 0;
+
+            while (rdr.Read())
+            {
+                idToChange = rdr.GetInt32(0);
+            }
+
+            ship.id = idToChange;
+
+            return ship;
+        }
+
+        public static BaseShip GetShipByID(int idToGet)
+        {
+            SQLiteCommand ship = StarDatabaseCode.sqlite_conn.CreateCommand();
+            ship.CommandText = $"SELECT shiptype FROM ships WHERE _id='{idToGet}'";
+            SQLiteDataReader rdr = ship.ExecuteReader();
+
+            BaseShip tempShip;
+
+            rdr.Read();
+
+            if (rdr.GetString(0) == "Cruiser")
+            {
+                Cruiser shipToGett = new Cruiser(rdr.GetInt32(0), rdr.GetInt32(1), rdr.GetInt32(2), rdr.GetInt32(3), rdr.GetFloat(4), rdr.GetFloat(5), rdr.GetFloat(6), rdr.GetInt32(7));
+                return shipToGett;
+            }
+
+            Cruiser shipToGet = new Cruiser(0, 0, 0, 0, 0, 0, 0, 0);
+            return shipToGet;
         }
 
         public static List<User> GetUsersInSystem(StarSystem sysName)
@@ -199,7 +294,7 @@ namespace Server
 
             while (rdr.Read())
             {
-                userToFetch = new User(rdr.GetInt32(0), rdr.GetString(1), rdr.GetString(2), rdr.GetInt32(3), rdr.GetInt32(4), rdr.GetInt32(5));
+                userToFetch = new User(rdr.GetInt32(0), rdr.GetString(1), rdr.GetString(2), rdr.GetInt32(3), rdr.GetInt32(4), rdr.GetInt32(5), rdr.GetInt32(6));
                 PopPosSystem(userToFetch);
                 usersInSystem.Add(userToFetch);
             }
@@ -216,7 +311,7 @@ namespace Server
             User userToFetch;
 
             rdr.Read();
-            userToFetch = new User(rdr.GetInt32(0),rdr.GetString(1), rdr.GetString(2), rdr.GetInt32(3), rdr.GetInt32(4), rdr.GetInt32(5));
+            userToFetch = new User(rdr.GetInt32(0),rdr.GetString(1), rdr.GetString(2), rdr.GetInt32(3), rdr.GetInt32(4), rdr.GetInt32(5), rdr.GetInt32(6));
             PopPosSystem(userToFetch);
 
             return userToFetch;

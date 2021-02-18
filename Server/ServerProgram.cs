@@ -6,6 +6,7 @@ using System.Text;
 using RequestLibrary;
 using System.IO;
 using RequestLibrary.Form;
+using Server.DatabaseFiles;
 
 namespace Server
 {
@@ -18,12 +19,14 @@ namespace Server
             Console.WriteLine("Generate new galaxy?");
             string ans = Console.ReadLine();
 
+            DatabaseHandler dbHandler = new DatabaseHandler();
+
             if (ans == "y")
             {
                 if (File.Exists("StarsDB.db"))
                 {
                     File.Delete("StarsDB.db");
-                }
+                }                
 
                 StarDatabaseCode.StartDB();
                 StarDatabaseCode.RefreshCurrentGalaxy();
@@ -36,8 +39,13 @@ namespace Server
             else
             {
                 StarDatabaseCode.StartDB();
-            }            
+            }
 
+            dbHandler.AddUser();
+            dbHandler.GetUser();
+            dbHandler.AddSystem();
+            dbHandler.GetSystem();
+            
             RequestListener listener = new RequestListener(57253);
 
             #region Request Registering

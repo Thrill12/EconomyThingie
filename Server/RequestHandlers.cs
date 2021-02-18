@@ -1,6 +1,7 @@
 ﻿using RequestLibrary;
 using RequestLibrary.Alerts;
 using RequestLibrary.Form;
+using RequestLibrary.ObjectClasses.Artificial.ShipThings.Ships;
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
@@ -31,6 +32,11 @@ namespace Server
             Console.WriteLine("User " + arg.username + " attempted to create account.");
 
             User currentUser = new User(arg.username, arg.password);
+            currentUser.equippedShip = new Cruiser();
+            currentUser.equippedShip.ownerID = currentUser.id;
+            currentUser.equippedShip.shipType = "Cruiser";
+            StarDatabaseCode.InsertShip(currentUser.equippedShip, currentUser);
+            StarDatabaseCode.SetProgramIDOfShip(currentUser.equippedShip);
 
             SQLiteCommand checkUser = StarDatabaseCode.sqlite_conn.CreateCommand();
             checkUser.CommandText = $"SELECT COUNT(*) FROM users WHERE username='{currentUser.username}'";
@@ -101,6 +107,7 @@ namespace Server
                         rdr.Close();
 
                         currUser.seshID = CreateSessionID(currUser.username, DateTime.Now);
+                        currUser.equippedShip = StarDatabaseCode.GetShipByID(currUser.id);
 
                         if (!liveUsers.ContainsKey(currUser.seshID))
                         {
@@ -187,7 +194,7 @@ namespace Server
             {
                 if(arg.textToSend.Trim() != "")
                 {
-                    RequestListener.alerter.SendAlerts(new TestAlert(arg.name + ": " + arg.textToSend), u);
+                    RequestListener.alerter.SendAlerts(new ChatAlert(arg.name + ": " + arg.textToSend), u);
                 }                
             }            
 
@@ -196,11 +203,11 @@ namespace Server
 
         public static string CreateSessionID(string name, DateTime time)
         {
-            byte[] data = Encoding.UTF8.GetBytes(name + time.ToString());
+            byte[] data = Encoding.ASCII.GetBytes(name + time.ToString());
 
             using (SHA256 sha256 = SHA256.Create())
             {
-                return Encoding.UTF8.GetString(sha256.ComputeHash(data));
+                return Encoding.ASCII.GetString(sha256.ComputeHash(data));
             }
         }
     }

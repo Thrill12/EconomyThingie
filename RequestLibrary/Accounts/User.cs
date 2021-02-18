@@ -1,4 +1,5 @@
 ﻿using RequestLibrary;
+using RequestLibrary.ObjectClasses.Artificial.ShipThings.Ships;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,6 +17,9 @@ namespace RequestLibrary
 
         public int galacticCredits;
         public int diplomaticWeight;
+
+        public BaseShip equippedShip;
+        public int equippedShipID;
 
         public User(string username, string password)
         {
@@ -44,10 +48,10 @@ namespace RequestLibrary
             this.diplomaticWeight = 0;
             this.galacticCredits = galacticCredits;
             this.diplomaticWeight = diplomaticWeight;
-            this.positionID = positionID;
+            this.positionID = positionID;            
         }
 
-        public User(int id, string username, string password, int positionID, int galacticCredits, int diplomaticWeight)
+        public User(int id, string username, string password, int positionID, int galacticCredits, int diplomaticWeight, int shipID)
         {
             this.id = id;
             this.username = username;
@@ -57,6 +61,7 @@ namespace RequestLibrary
             this.galacticCredits = galacticCredits;
             this.diplomaticWeight = diplomaticWeight;
             this.positionID = positionID;
+            equippedShipID = shipID;
         }
     }
 }
