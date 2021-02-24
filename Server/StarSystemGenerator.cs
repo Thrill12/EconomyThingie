@@ -1,4 +1,5 @@
 ﻿using RequestLibrary;
+using Server.DatabaseFiles;
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
@@ -22,34 +23,45 @@ namespace Server
 
             Console.WriteLine("Started systems...");
 
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 CreateNewSystem();
             }
             CreateHyperlanes();
 
-            using (var transaction = StarDatabaseCode.sqlite_conn.BeginTransaction())
-            {
-                Console.WriteLine("Starting scan...");
-                foreach (StarSystem system in systems)
-                {
-                    StarDatabaseCode.InsertSystem(system);
-                }
-                Console.WriteLine("Systems added.");
-                foreach (Planet planet in planets)
-                {
-                    StarDatabaseCode.InsertPlanet(planet);
-                }
-                Console.WriteLine("Planets constructed.");
-                foreach (Hyperlane hyperlane in hyperLanes)
-                {
-                    StarDatabaseCode.InsertHyperlanes(hyperlane);
-                }
-                Console.WriteLine("Hyperlanes discovered.");
+            Console.WriteLine("Starting scan.");
+            DatabaseHandler.AddListOfSystems(systems);
+            Console.WriteLine("Systems added.");
+            DatabaseHandler.AddListOfPlanets(planets);
+            Console.WriteLine("Planets constructed.");
+            DatabaseHandler.AddListOfHyperlanes(hyperLanes);
+            Console.WriteLine("Hyperlanes discovered.");
 
-                transaction.Commit();
-                Console.WriteLine("Transaction made.");
-            }
+            #region OldAddingStuff
+            //using (var transaction = StarDatabaseCode.sqlite_conn.BeginTransaction())
+            //{
+            //    Console.WriteLine("Starting scan...");
+            //    foreach (StarSystem system in systems)
+            //    {
+            //        StarDatabaseCode.InsertSystem(system);
+            //    }
+            //    Console.WriteLine("Systems added.");
+            //    foreach (Planet planet in planets)
+            //    {
+            //        StarDatabaseCode.InsertPlanet(planet);
+            //    }
+            //    Console.WriteLine("Planets constructed.");
+            //    foreach (Hyperlane hyperlane in hyperLanes)
+            //    {
+            //        StarDatabaseCode.InsertHyperlanes(hyperlane);
+            //    }
+            //    Console.WriteLine("Hyperlanes discovered.");
+
+            //    transaction.Commit();
+            //    Console.WriteLine("Transaction made.");
+            //}
+            #endregion
+
             watch.Stop();
             Console.WriteLine(watch.ElapsedMilliseconds);
         }
@@ -59,6 +71,7 @@ namespace Server
             Random rand = new Random();
 
             int id = starCounter + 1;
+            //Name generator HERE!!!!
             string name = "SUN-" + id;
             int starClass = rand.Next(0, 10);
             int posX = rand.Next(-10000, 10001);
@@ -85,7 +98,7 @@ namespace Server
             name = sysID.name + " - " + (sysID.planets.Count() + 1);
             int planetClass = rand.Next(0, 10);
             string biome = "[INSERT BIOME]";
-
+            
             Planet currentPlanet = new Planet(sysID, name, planetClass, biome);
             sysID.planets.Add(currentPlanet);
 

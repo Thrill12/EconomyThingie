@@ -1,5 +1,6 @@
 ﻿using RequestLibrary;
 using RequestLibrary.ObjectClasses.Artificial.ShipThings.Ships;
+using Server.DatabaseFiles;
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
@@ -146,12 +147,14 @@ namespace Server
                 count = rdr.GetInt32(0);
             }
 
-            if(count == 0)
+            if (count == 0)
             {
                 addSystem.CommandText = @$"INSERT INTO starsystems(name, class, positionX, positionY) 
                                                             VALUES('{system.name}', {system.starClass},{system.posX}, {system.posY}); ";
                 addSystem.ExecuteNonQuery();
-            }           
+            }
+
+            //ServerProgram.dbHandler.AddSystem(system);
         }
 
         public static void InsertPlanet(Planet planet)

@@ -17,9 +17,7 @@ namespace Server
         static void Main(string[] args)
         {        
             Console.WriteLine("Generate new galaxy?");
-            string ans = Console.ReadLine();
-
-            DatabaseHandler dbHandler = new DatabaseHandler();
+            string ans = Console.ReadLine();            
 
             if (ans == "y")
             {
@@ -40,11 +38,6 @@ namespace Server
             {
                 StarDatabaseCode.StartDB();
             }
-
-            dbHandler.AddUser();
-            dbHandler.GetUser();
-            dbHandler.AddSystem();
-            dbHandler.GetSystem();
             
             RequestListener listener = new RequestListener(57253);
 

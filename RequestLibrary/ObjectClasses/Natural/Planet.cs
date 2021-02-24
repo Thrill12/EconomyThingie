@@ -1,22 +1,35 @@
-﻿using System;
+﻿using SQLite;
+using SQLiteNetExtensions;
+using SQLiteNetExtensions.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace RequestLibrary
 {
+    [Table("planets")]
     public class Planet
     {
-
-        public int ID;
+        [PrimaryKey, AutoIncrement]
+        [Column("id")]
+        public int ID { get; set; }
         public StarSystem sysID;
-        public int systemID;
-        public string name;
-        public int size;
-        public string biome;
+        [Column("name")]
+        public string name { get; set; }
+
+        [Column("sysid")]
+        public int systemID { get; set; }
+
+        public StarSystem sys { get; set; }
+        [Column("size")]
+        public int size { get; set; }
+        [Column("biome")]
+        public string biome { get; set; }
 
         public Planet(StarSystem sysID, string name, int size, string biome)
         {
-            this.sysID = sysID;
+            this.sys = sysID;
+            this.systemID = sysID.ID;
             this.name = name;
             this.size = size;
             this.biome = biome;
@@ -28,6 +41,11 @@ namespace RequestLibrary
             this.name = name;
             this.size = size;
             this.biome = biome;
+        }
+
+        public Planet()
+        {
+
         }
     }
 }
