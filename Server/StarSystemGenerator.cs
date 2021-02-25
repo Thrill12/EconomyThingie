@@ -23,18 +23,18 @@ namespace Server
 
             Console.WriteLine("Started systems...");
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 10000; i++)
             {
                 CreateNewSystem();
             }
             CreateHyperlanes();
 
             Console.WriteLine("Starting scan.");
-            DatabaseHandler.AddListOfSystems(systems);
+            ServerProgram.dbHandler.AddListOfSystems(systems);
             Console.WriteLine("Systems added.");
-            DatabaseHandler.AddListOfPlanets(planets);
+            ServerProgram.dbHandler.AddListOfPlanets(planets);
             Console.WriteLine("Planets constructed.");
-            DatabaseHandler.AddListOfHyperlanes(hyperLanes);
+            ServerProgram.dbHandler.AddListOfHyperlanes(hyperLanes);
             Console.WriteLine("Hyperlanes discovered.");
 
             #region OldAddingStuff
@@ -95,12 +95,11 @@ namespace Server
 
             string name;
 
-            name = sysID.name + " - " + (sysID.planets.Count() + 1);
+            name = sysID.name + " grr ";
             int planetClass = rand.Next(0, 10);
             string biome = "[INSERT BIOME]";
             
             Planet currentPlanet = new Planet(sysID, name, planetClass, biome);
-            sysID.planets.Add(currentPlanet);
 
             planets.Add(currentPlanet);
             //Console.WriteLine("Planet " + name + " added");

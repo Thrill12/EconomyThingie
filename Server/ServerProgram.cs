@@ -12,10 +12,13 @@ namespace Server
 {
     public class ServerProgram
     {
+        public static DatabaseHandler dbHandler;
         public static Dictionary<string, User> liveUsers = new Dictionary<string, User>();
 
         static void Main(string[] args)
-        {        
+        {
+            dbHandler = new DatabaseHandler();
+
             Console.WriteLine("Generate new galaxy?");
             string ans = Console.ReadLine();            
 
@@ -26,17 +29,17 @@ namespace Server
                     File.Delete("StarsDB.db");
                 }                
 
-                StarDatabaseCode.StartDB();
-                StarDatabaseCode.RefreshCurrentGalaxy();
+                //StarDatabaseCode.StartDB();
+                DatabaseHandler.RefreshCurrentGalaxy();
 
                 StarSystemGenerator gen = new StarSystemGenerator();
                 gen.GenerateGalaxy();
 
-                StarDatabaseCode.GetMainCluster();
+                DatabaseHandler.GetMainCluster();
             }
             else
             {
-                StarDatabaseCode.StartDB();
+                //woah
             }
             
             RequestListener listener = new RequestListener(57253);

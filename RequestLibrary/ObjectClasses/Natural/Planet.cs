@@ -13,14 +13,13 @@ namespace RequestLibrary
         [PrimaryKey, AutoIncrement]
         [Column("id")]
         public int ID { get; set; }
-        public StarSystem sysID;
+        
         [Column("name")]
         public string name { get; set; }
 
-        [Column("sysid")]
-        public int systemID { get; set; }
+        [ForeignKey(typeof(StarSystem))]
+        public int sysId { get; set; }
 
-        public StarSystem sys { get; set; }
         [Column("size")]
         public int size { get; set; }
         [Column("biome")]
@@ -28,20 +27,19 @@ namespace RequestLibrary
 
         public Planet(StarSystem sysID, string name, int size, string biome)
         {
-            this.sys = sysID;
-            this.systemID = sysID.ID;
+            this.sysId = sysID.ID;
             this.name = name;
             this.size = size;
             this.biome = biome;
         }
 
-        public Planet(int systemID, string name, int size, string biome)
-        {
-            this.systemID = systemID;
-            this.name = name;
-            this.size = size;
-            this.biome = biome;
-        }
+        //public Planet(int systemID, string name, int size, string biome)
+        //{
+        //    this.systemID = systemID;
+        //    this.name = name;
+        //    this.size = size;
+        //    this.biome = biome;
+        //}
 
         public Planet()
         {

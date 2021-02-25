@@ -157,36 +157,36 @@ namespace Server
             //ServerProgram.dbHandler.AddSystem(system);
         }
 
-        public static void InsertPlanet(Planet planet)
-        {
-            SQLiteCommand addPlanet;
-            addPlanet = sqlite_conn.CreateCommand();
+        //public static void InsertPlanet(Planet planet)
+        //{
+        //    SQLiteCommand addPlanet;
+        //    addPlanet = sqlite_conn.CreateCommand();
 
-            string chkStr = $"SELECT COUNT(*) FROM planets WHERE _id={planet.ID}";
-            using var cmd = new SQLiteCommand(chkStr, sqlite_conn);
-            using SQLiteDataReader rdr = cmd.ExecuteReader();
+        //    string chkStr = $"SELECT COUNT(*) FROM planets WHERE _id={planet.ID}";
+        //    using var cmd = new SQLiteCommand(chkStr, sqlite_conn);
+        //    using SQLiteDataReader rdr = cmd.ExecuteReader();
 
-            int count = 0;
+        //    int count = 0;
 
-            while (rdr.Read())
-            {
-                count = rdr.GetInt32(0);
-            }
+        //    while (rdr.Read())
+        //    {
+        //        count = rdr.GetInt32(0);
+        //    }
 
-            if (count == 0)
-            {
-                addPlanet.CommandText = @$"INSERT INTO planets(name, sysid, size, biome) 
-                                                            VALUES('{planet.name}', {planet.sysID.ID},{planet.size}, '{planet.biome}'); ";
-                addPlanet.ExecuteNonQuery();
-            }                
-        }
+        //    if (count == 0)
+        //    {
+        //        addPlanet.CommandText = @$"INSERT INTO planets(name, sysid, size, biome) 
+        //                                                    VALUES('{planet.name}', {planet.sysID.ID},{planet.size}, '{planet.biome}'); ";
+        //        addPlanet.ExecuteNonQuery();
+        //    }                
+        //}
 
         public static void InsertHyperlanes(Hyperlane hyperlane)
         {
             SQLiteCommand addHyperLane;
             addHyperLane = sqlite_conn.CreateCommand();
             addHyperLane.CommandText = @$"INSERT INTO hyperlanes(sysid1, sysid2, length) 
-                                                            VALUES({hyperlane.sysid1.ID}, {hyperlane.sysid2.ID}, {hyperlane.length.ToString(CultureInfo.InvariantCulture)}); ";
+                                                            VALUES({hyperlane.sysId1}, {hyperlane.sysId2}, {hyperlane.length.ToString(CultureInfo.InvariantCulture)}); ";
             addHyperLane.ExecuteNonQuery();
         }
 
@@ -383,18 +383,18 @@ namespace Server
             return system;
         }
 
-        public static Planet FindPlanet(string name)
-        {
-            string selectStartSystemCommand = $"SELECT * FROM planets WHERE name = '{name}'";
-            using var cmd = new SQLiteCommand(selectStartSystemCommand, StarDatabaseCode.sqlite_conn);
-            using SQLiteDataReader rdr = cmd.ExecuteReader();
+        //public static Planet FindPlanet(string name)
+        //{
+        //    string selectStartSystemCommand = $"SELECT * FROM planets WHERE name = '{name}'";
+        //    using var cmd = new SQLiteCommand(selectStartSystemCommand, StarDatabaseCode.sqlite_conn);
+        //    using SQLiteDataReader rdr = cmd.ExecuteReader();
 
-            Planet planet;
-            rdr.Read();
-            planet = new Planet(rdr.GetInt32(0), rdr.GetString(1), rdr.GetInt32(3), rdr.GetString(4));
+        //    Planet planet;
+        //    rdr.Read();
+        //    planet = new Planet(rdr.GetInt32(0), rdr.GetString(1), rdr.GetInt32(3), rdr.GetString(4));
 
-            return planet;
-        }
+        //    return planet;
+        //}
 
         public static List<StarSystem> FindJumpableSystems(StarSystem startSystem)
         {

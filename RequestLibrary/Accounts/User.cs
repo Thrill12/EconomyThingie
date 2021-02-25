@@ -3,23 +3,38 @@ using RequestLibrary.ObjectClasses.Artificial.ShipThings.Ships;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using SQLite;
+using SQLiteNetExtensions.Attributes;
 
 namespace RequestLibrary
 {
+    [Table("users")]
     public class User
     {
-        public int id;
-        public string seshID;
-        public string username;
-        public string password;
-        public StarSystem position;
-        public int positionID;
+        [PrimaryKey, AutoIncrement]
+        public int id { get; set; }
+        [Ignore]
+        public string seshID { get; set; }
+        [Indexed]
+        [Column("username")]
+        public string username { get; set; }
+        [Column("password")]
+        public string password { get; set; }
 
-        public int galacticCredits;
-        public int diplomaticWeight;
+        [ForeignKey(typeof(StarSystem))]
+        public int positionID { get; set; }
 
-        public BaseShip equippedShip;
-        public int equippedShipID;
+        [Ignore]
+        public StarSystem position { get; set; }
+
+        [Column("galacticcredits")]
+        public int galacticCredits { get; set; }
+        [Column("diplomaticweight")]
+        public int diplomaticWeight { get; set; }
+        [Ignore]
+        public BaseShip equippedShip { get; set; }
+        [Ignore]
+        public int equippedShipID { get; set; }
 
         public User(string username, string password)
         {

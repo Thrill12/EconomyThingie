@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using SQLite;
 using SQLiteNetExtensions;
+using SQLiteNetExtensions.Attributes;
 
 namespace RequestLibrary
 {
@@ -13,6 +14,7 @@ namespace RequestLibrary
         [Column("id")]
         public int ID { get; set; }
 
+        [Indexed]
         [Column("name")]
         public string name { get; set; }
 
@@ -25,7 +27,11 @@ namespace RequestLibrary
         [Column("positiony")]
         public int posY { get; set; }
 
-        public List<Planet> planets = new List<Planet>();
+        [OneToMany]
+        public List<Planet> planets { get; set; }
+
+        [ManyToMany(typeof(StarSystem))]
+        public List<StarSystem> hyperlanes { get; set; }
 
         public StarSystem(int ID, string name, int starClass, int posX, int posY)
         {
