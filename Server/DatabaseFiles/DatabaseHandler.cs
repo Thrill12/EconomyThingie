@@ -4,6 +4,10 @@ using System.Text;
 using RequestLibrary;
 using SQLite;
 using System.Linq;
+using RequestLibrary.ObjectClasses.Artificial.ShipThings.Ships;
+using RequestLibrary.ObjectClasses.Artificial.ShipThings.Slots;
+using RequestLibrary.ObjectClasses.Artificial.ShipThings.Modules.PassiveModules;
+using RequestLibrary.ObjectClasses.Artificial.ShipThings.Modules;
 
 namespace Server.DatabaseFiles
 {
@@ -17,6 +21,8 @@ namespace Server.DatabaseFiles
             db.CreateTable<Planet>();
             db.CreateTable<Hyperlane>();
             db.CreateTable<User>();
+            db.CreateTable<BaseShip>();
+            db.CreateTable<BaseModule>();
         }
 
         //public static void AddUser()
@@ -42,6 +48,23 @@ namespace Server.DatabaseFiles
             {
                 db.Insert(user);
             }           
+        }
+
+        public static void InsertShip(BaseShip shipToAdd)
+        {
+            db.Insert(shipToAdd);
+        }
+
+        public static BaseShip GetShipById(int id)
+        {
+            var ship = db.Query<BaseShip>($"SELECT * FROM ships WHERE id={id}").ToList()[0];
+            return ship;
+        }
+
+        public static int GetNumOfUsers()
+        {
+            var res = db.Query<User>("SELECT * FROM users").Count();
+            return res;
         }
 
         public static User GetWholeUser(string username)
@@ -95,6 +118,10 @@ namespace Server.DatabaseFiles
             {
                 db.DropTable<User>();
                 db.CreateTable<User>();
+                db.DropTable<BaseShip>();
+                db.CreateTable<BaseShip>();
+                db.DropTable<BaseModule>();
+                db.CreateTable<BaseModule>();
             }
         }
 

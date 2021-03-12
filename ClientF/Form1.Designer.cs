@@ -225,8 +225,10 @@
             // ShipTestingDisplay
             // 
             this.ShipTestingDisplay.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.ShipTestingDisplay.HideSelection = false;
             this.ShipTestingDisplay.Location = new System.Drawing.Point(755, 80);
             this.ShipTestingDisplay.Name = "ShipTestingDisplay";
+            this.ShipTestingDisplay.ReadOnly = true;
             this.ShipTestingDisplay.Size = new System.Drawing.Size(129, 217);
             this.ShipTestingDisplay.TabIndex = 14;
             this.ShipTestingDisplay.Text = "";

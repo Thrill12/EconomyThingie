@@ -3,14 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RequestLibrary.ObjectClasses.Artificial.ShipThings.Ships;
 using RequestLibrary.ObjectClasses.Artificial.ShipThings.Slots;
+using SQLite;
+using SQLiteNetExtensions.Attributes;
 
 namespace RequestLibrary.ObjectClasses.Artificial.ShipThings.Modules
 {
+    [Table("Modules")]
     public class BaseModule
     {
-        public long weight;
-        public long energyReq;
+        [PrimaryKey, AutoIncrement]
+        public int id { get; set; }
+        [Column("weight")]
+        public long weight { get; set; }
+        [Column("energyreq")]
+        public long energyReq { get; set; }
+        [ForeignKey(typeof(BaseShip))]
+        public int equippedShipID { get; set; }
 
         public BaseModule(long weight, long energyReq)
         {
@@ -19,6 +29,11 @@ namespace RequestLibrary.ObjectClasses.Artificial.ShipThings.Modules
         }
 
         public BaseModule()
+        {
+
+        }
+
+        public virtual void ApplyEffect()
         {
 
         }

@@ -36,6 +36,8 @@ namespace ClientF
             FindAndDisplayNearbyStars();
             FindAndDisplayLocalPlayers();
 
+            currUser.equippedShip.UpdateShipStats();
+
             BackgroundWorker bw = new BackgroundWorker();
             bw.DoWork += backgroundWorker1_DoWork;
             bw.RunWorkerCompleted += backgroundWorker1_RunWorkerCompleted;
@@ -46,6 +48,7 @@ namespace ClientF
         private void OnAlert(ChatAlert alert)
         {
             ChatBox.AppendText(alert.messageToSend + "\n");
+            ChatBox.SelectionStart = ChatBox.Text.Length;
             ChatBox.ScrollToCaret();
         }
 
@@ -125,6 +128,7 @@ namespace ClientF
                 ShipTestingDisplay.AppendText((currUser.equippedShip.crewCap + "\n").ToString());
                 ShipTestingDisplay.AppendText((currUser.equippedShip.health + "\n").ToString());
                 ShipTestingDisplay.AppendText((currUser.equippedShip.QELimit + "\n").ToString());
+                ShipTestingDisplay.AppendText((currUser.equippedShip.passiveSlots.Count().ToString() + " slots in the ship." + "\n"));
             }            
         }
 

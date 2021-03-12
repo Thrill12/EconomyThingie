@@ -4,13 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RequestLibrary.ObjectClasses.Artificial.ShipThings.Modules;
+using RequestLibrary.ObjectClasses.Artificial.ShipThings.Ships;
+using SQLite;
+using SQLiteNetExtensions.Attributes;
 
 namespace RequestLibrary.ObjectClasses.Artificial.ShipThings.Slots
 {
     public class Slot<T> where T : BaseModule
     {
-        public string slotName;
-        public T slotType;
+        public int id { get; set; }
+        public string slotName { get; set; }
+        public T slotType { get; set; }
 
         public Slot(string slotName)
         {

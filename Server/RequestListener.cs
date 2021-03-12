@@ -71,7 +71,7 @@ namespace Server
             TcpClient client = obj as TcpClient;
 
             Stopwatch watch = Stopwatch.StartNew();
-            long timeout = 1000 * 60 * 10; // 10 minutes
+            long timeout = 1000 * 60 * 10; // 5 seconds
 
             using (NetworkStream stream = client.GetStream())
             {
@@ -87,7 +87,7 @@ namespace Server
                     HandleAlerts(stream);
                 }
 
-                stream.Flush();
+                stream.Flush();              
             }
 
             client.Close();
@@ -98,7 +98,7 @@ namespace Server
                 User user = users[Thread.CurrentThread];
                 lock (users)
                 {
-                    ServerProgram.liveUsers.Remove(user.seshID);
+                    ServerProgram.RemoveFromLive(user);
                     users.Remove(Thread.CurrentThread);
                 }
             }

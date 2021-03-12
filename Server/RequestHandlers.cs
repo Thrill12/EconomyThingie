@@ -38,37 +38,6 @@ namespace Server
         //    StarDatabaseCode.InsertShip(currentUser.equippedShip, currentUser);
         //    StarDatabaseCode.SetProgramIDOfShip(currentUser.equippedShip);
 
-        //    SQLiteCommand checkUser = StarDatabaseCode.sqlite_conn.CreateCommand();
-        //    checkUser.CommandText = $"SELECT COUNT(*) FROM users WHERE username='{currentUser.username}'";
-        //    SQLiteDataReader r = checkUser.ExecuteReader();
-        //    r.Read();
-        //    long count = (long)r["COUNT(*)"];
-
-        //    if (count > 1)
-        //    {
-        //        return Response.From<User>(null);
-        //    }
-        //    else
-        //    {
-        //        string selectStartSystemCommand = "SELECT * FROM starsystems WHERE NAME = 'SUN-1'";
-        //        using var cmd = new SQLiteCommand(selectStartSystemCommand, StarDatabaseCode.sqlite_conn);
-        //        using SQLiteDataReader rdr = cmd.ExecuteReader();
-
-        //        while (rdr.Read())
-        //        {
-        //            StarSystem startSystem = new StarSystem(rdr.GetInt32(0), rdr.GetString(1), rdr.GetInt32(2), rdr.GetInt32(3), rdr.GetInt32(4));
-        //            currentUser.position = startSystem;
-        //        }
-
-        //        currentUser.seshID = CreateSessionID(currentUser.username, DateTime.Now);
-        //        liveUsers.Add(currentUser.seshID, currentUser);
-
-        //        StarDatabaseCode.InsertUser(currentUser);
-        //        RequestListener.alerter.RegisterUser(currentUser);
-        //        return Response.From(currentUser);
-        //    }
-        //}
-
         public static Response CreateAccountRequestHandler(CreateAccountRequest arg)
         {
             Console.WriteLine("User " + arg.username + " attempted to create account.");
@@ -81,9 +50,22 @@ namespace Server
             }
             else
             {
+                currentUser.id = DatabaseFiles.DatabaseHandler.GetNumOfUsers() + 1;
+
                 var startSystem = DatabaseFiles.DatabaseHandler.db.Query<StarSystem>("SELECT * FROM starsystems WHERE ID=1").ToList()[0];
                 currentUser.position = startSystem;
                 currentUser.positionID = startSystem.ID;
+                currentUser.equippedShip = new Cruiser();
+                currentUser.equippedShip.shipType = "Cruiser";
+                currentUser.equippedShip.ownerID = currentUser.id;
+                currentUser.equippedShip.id = DatabaseFiles.DatabaseHandler.db.Query<BaseShip>("SELECT * FROM ships").ToList().Count() + 1;
+                currentUser.equippedShipID = currentUser.equippedShip.id;
+
+                BaseShip shipToReplace = new BaseShip(currentUser.equippedShip);
+                shipToReplace.ownerID = currentUser.id;
+                //shipToReplace.shipType = "Cruiser";
+
+                DatabaseFiles.DatabaseHandler.InsertShip(shipToReplace);
                 currentUser.seshID = CreateSessionID(currentUser.username + DateTime.Today.ToString(), DateTime.Now);
                 liveUsers.Add(currentUser.seshID, currentUser);
                 DatabaseFiles.DatabaseHandler.InsertUser(currentUser);
@@ -169,34 +151,30 @@ namespace Server
 
             try
             {
-                if(currUser != null)
+                int count = DatabaseFiles.DatabaseHandler.db.Query<User>($"SELECT COUNT(*) FROM users WHERE username='{currUser.username}' AND password='{currUser.password}'").ToList().Count();
+
+                if (count >= 1)
                 {
-                    int count = DatabaseFiles.DatabaseHandler.db.Query<User>($"SELECT COUNT(*) FROM users WHERE username='{currUser.username}' AND password='{currUser.password}'").ToList().Count();
-
-                    if (count >= 1)
+                    if (!liveUsers.ContainsValue(currUser))
                     {
-                        if (!liveUsers.ContainsValue(currUser))
+                        Console.WriteLine(currUser.username + " logging in...");
+                        currUser.seshID = CreateSessionID(currUser.username, DateTime.Now);
+                        currUser.position = DatabaseFiles.DatabaseHandler.db.Query<StarSystem>($"SELECT * FROM starsystems WHERE id={currUser.positionID}").ToList()[0];
+                        currUser.equippedShip = DatabaseFiles.DatabaseHandler.GetShipById(currUser.equippedShipID);
+                        currUser.equippedShip = currUser.equippedShip.ChangeType();
+                        Console.WriteLine(currUser.username + " logging in in system " + currUser.position.name);
+
+                        if (!liveUsers.ContainsKey(currUser.seshID))
                         {
-                            Console.WriteLine(currUser.username + " logging in...");
-                            currUser.position = DatabaseFiles.DatabaseHandler.db.Query<StarSystem>($"SELECT * FROM starsystems WHERE id={currUser.positionID}").ToList()[0];
-                            Console.WriteLine(currUser.username + " logging in in system " + currUser.position.name);
-
-                            if (!liveUsers.ContainsKey(currUser.seshID))
-                            {
-                                liveUsers.Add(currUser.seshID, currUser);
-                            }
-                            else
-                            {
-                                liveUsers[currUser.seshID] = currUser;
-                            }
-
-                            RequestListener.alerter.RegisterUser(currUser);
-                            return Response.From(currUser);
+                            liveUsers.Add(currUser.seshID, currUser);
                         }
                         else
                         {
-                            return Response.From<User>(null);
+                            liveUsers[currUser.seshID] = currUser;
                         }
+
+                        RequestListener.alerter.RegisterUser(currUser);
+                        return Response.From(currUser);
                     }
                     else
                     {
@@ -211,8 +189,8 @@ namespace Server
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-            }           
-            return Response.From<User>(null);
+            }
+            return Response.From(currUser);
         }
 
         public static Response UpdateClientOnServerRequestHandler(UpdateClientOnServerRequest arg)
@@ -228,7 +206,7 @@ namespace Server
             //command = $"UPDATE users SET sysid={arg.user.positionID} WHERE username='{arg.user.username}'";
             //using var cmddd = new SQLiteCommand(command, StarDatabaseCode.sqlite_conn);
             //cmddd.ExecuteNonQuery();
-            DatabaseFiles.DatabaseHandler.db.Query<User>($"UPDATE users SET sysid={arg.user.positionID} WHERE username='{arg.user.username}'");
+            DatabaseFiles.DatabaseHandler.db.Query<User>($"UPDATE users SET positionID={arg.user.positionID} WHERE username='{arg.user.username}'");
 
             bool x = liveUsers.Keys.First() == arg.user.seshID;
 

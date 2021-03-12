@@ -61,7 +61,7 @@ namespace Server
             listener.StartListening();        
         }   
         
-        public void RemoveFromLive(User user)
+        public static void RemoveFromLive(User user)
         {
             liveUsers.Remove(user.seshID);
         }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RequestLibrary.ObjectClasses.Artificial.ShipThings.Ships;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,10 +10,17 @@ namespace RequestLibrary.ObjectClasses.Artificial.ShipThings.Modules.PassiveModu
     class QEDriveTier1 : BasePassiveModule
     {
         public int QEIncrease = 15;
+        public BaseShip owningShip;
         
         public QEDriveTier1() : base(500, 5)
         {
 
+        }
+
+        public override void ApplyEffect()
+        {
+            //base.ApplyEffect();
+            owningShip.QELimit += 15;
         }
     }
 }

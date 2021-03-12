@@ -31,9 +31,10 @@ namespace RequestLibrary
         public int galacticCredits { get; set; }
         [Column("diplomaticweight")]
         public int diplomaticWeight { get; set; }
-        [Ignore]
+
+        [OneToOne]
         public BaseShip equippedShip { get; set; }
-        [Ignore]
+        [ForeignKey(typeof(BaseShip))]
         public int equippedShipID { get; set; }
 
         public User(string username, string password)
