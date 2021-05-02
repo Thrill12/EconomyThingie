@@ -44,6 +44,7 @@
             this.LocalPlayers = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.ShipTestingDisplay = new System.Windows.Forms.RichTextBox();
+            this.AddQEModule = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // UsernameBox
@@ -233,11 +234,22 @@
             this.ShipTestingDisplay.TabIndex = 14;
             this.ShipTestingDisplay.Text = "";
             // 
+            // AddQEModule
+            // 
+            this.AddQEModule.Location = new System.Drawing.Point(890, 93);
+            this.AddQEModule.Name = "AddQEModule";
+            this.AddQEModule.Size = new System.Drawing.Size(132, 43);
+            this.AddQEModule.TabIndex = 15;
+            this.AddQEModule.Text = "Add QE drive";
+            this.AddQEModule.UseVisualStyleBackColor = true;
+            this.AddQEModule.Click += new System.EventHandler(this.AddQEModule_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1034, 561);
+            this.Controls.Add(this.AddQEModule);
             this.Controls.Add(this.ShipTestingDisplay);
             this.Controls.Add(this.LocalPlayers);
             this.Controls.Add(this.ChatBoxInput);
@@ -255,6 +267,8 @@
             this.MinimumSize = new System.Drawing.Size(1050, 600);
             this.Name = "Form1";
             this.Text = "SEND";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -278,6 +292,7 @@
         private System.Windows.Forms.ListView LocalPlayers;
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.RichTextBox ShipTestingDisplay;
+        private System.Windows.Forms.Button AddQEModule;
     }
 }
 

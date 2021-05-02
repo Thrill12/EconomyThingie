@@ -30,6 +30,10 @@ namespace RequestLibrary
         [OneToMany]
         public List<Planet> planets { get; set; }
 
+        //[ForeignKey(typeof(Sector))]
+        //[Column("sector")]
+        //public Sector owningSector { get; set; }
+
         [ManyToMany(typeof(StarSystem))]
         public List<StarSystem> hyperlanes { get; set; }
 

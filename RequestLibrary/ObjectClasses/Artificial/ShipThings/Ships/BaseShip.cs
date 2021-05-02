@@ -39,15 +39,13 @@ namespace RequestLibrary.ObjectClasses.Artificial.ShipThings.Ships
         public string shipType { get; set; }
 
         [ManyToMany(typeof(BaseModule))]
-        public List<BaseModule> equippedModules { get; set; }
+        public List<BaseModule> equippedModules { get; set; } = new List<BaseModule>();
 
         [Ignore]
-        public List<Slot<BasePassiveModule>> passiveSlots { get; set; }
+        public List<Slot<BasePassiveModule>> passiveSlots { get; set; } = new List<Slot<BasePassiveModule>>();
 
         public BaseShip(int health,  int cargoLimit, int weight, float energy, float qELimit, int shield = 0)
         {
-            UpdateShipStats();
-
             this.health = health;
             this.shield = shield;
             this.cargoLimit = cargoLimit;
@@ -70,7 +68,6 @@ namespace RequestLibrary.ObjectClasses.Artificial.ShipThings.Ships
 
         public BaseShip(BaseShip shipToReplace)
         {
-            shipToReplace.UpdateShipStats();
             id = shipToReplace.id;
             health = shipToReplace.health;
             shield = shipToReplace.shield;
@@ -88,21 +85,24 @@ namespace RequestLibrary.ObjectClasses.Artificial.ShipThings.Ships
 
         public virtual void UpdateShipStats()
         {
-            equippedModules = new List<BaseModule>();
-            passiveSlots = new List<Slot<BasePassiveModule>>();
-           
-            if(equippedModules.Count() > 0)
+            health = health;
+        }
+
+        public void UpdateModules()
+        {
+            if (equippedModules.Count() > 0)
             {
-                foreach (BaseModule module in equippedModules)
+                foreach (BaseModule mod in equippedModules)
                 {
-                    module.ApplyEffect();
+                    mod.ApplyEffect(this);
                 }
-            }           
+            }
         }
 
         public virtual void ResetStats()
         {
-
+            equippedModules.Clear();
+            passiveSlots.Clear();
         }
 
         public virtual void AddSlots()
@@ -116,7 +116,7 @@ namespace RequestLibrary.ObjectClasses.Artificial.ShipThings.Ships
             {
                 case "Cruiser":
                     Cruiser ship = new Cruiser(this);
-                    ship.UpdateShipStats();
+                    //ship.UpdateShipStats();
                     return ship;               
             }
 

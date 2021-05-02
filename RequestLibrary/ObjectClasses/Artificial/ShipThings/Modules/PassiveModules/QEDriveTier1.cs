@@ -7,20 +7,18 @@ using System.Threading.Tasks;
 
 namespace RequestLibrary.ObjectClasses.Artificial.ShipThings.Modules.PassiveModules
 {
-    class QEDriveTier1 : BasePassiveModule
+    public class QEDriveTier1 : BaseModule
     {
         public int QEIncrease = 15;
-        public BaseShip owningShip;
         
         public QEDriveTier1() : base(500, 5)
         {
 
         }
 
-        public override void ApplyEffect()
+        public override void ApplyEffect(BaseShip shipToApplyTo)
         {
-            //base.ApplyEffect();
-            owningShip.QELimit += 15;
+            shipToApplyTo.QELimit += 15;
         }
     }
 }

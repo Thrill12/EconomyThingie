@@ -1,6 +1,5 @@
 ﻿using RequestLibrary;
 using RequestLibrary.Alerts;
-using RequestLibrary.Form;
 using RequestLibrary.ObjectClasses.Artificial.ShipThings.Ships;
 using System;
 using System.Collections.Generic;
@@ -193,6 +192,12 @@ namespace Server
             return Response.From(currUser);
         }
 
+        public static Response AddModuleRequestHandler(AddModuleRequest arg)
+        {
+            arg.owningUser.equippedShip.equippedModules.Add(arg.modToAdd);
+            return Response.From<User>(arg.owningUser);
+        }
+
         public static Response UpdateClientOnServerRequestHandler(UpdateClientOnServerRequest arg)
         {         
             //string command = $"UPDATE users SET galacticcredits={arg.user.galacticCredits} WHERE username='{arg.user.username}'";
@@ -254,6 +259,13 @@ namespace Server
                     RequestListener.alerter.SendAlerts(new ChatAlert(arg.name + ": " + arg.textToSend), u);
                 }                
             }            
+
+            return Response.Ok();
+        }
+
+        public static Response UserDisconnectRequestHandler(UserDisconnectRequest arg)
+        {
+            ServerProgram.RemoveFromLive(arg.userDisconnected);
 
             return Response.Ok();
         }

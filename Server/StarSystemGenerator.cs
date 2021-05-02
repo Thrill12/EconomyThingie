@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -64,6 +65,11 @@ namespace Server
 
             watch.Stop();
             Console.WriteLine(watch.ElapsedMilliseconds);
+        }
+
+        public void CreateSectors()
+        {
+            
         }
 
         public void CreateNewSystem()
@@ -133,6 +139,17 @@ namespace Server
                     }
                 }
             }            
+        }
+
+        public static string PickRandomNameFromText(string path)
+        {
+            string[] fP = File.ReadAllText(path).Split("\n");
+
+            Random rnd = new Random();
+            int x = rnd.Next(1, fP.Length);
+            string final = fP[x];
+
+            return final;
         }
     }
 }

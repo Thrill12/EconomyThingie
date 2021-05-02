@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using RequestLibrary.ObjectClasses.Artificial.ShipThings.Ships;
 using RequestLibrary.ObjectClasses.Artificial.ShipThings.Slots;
 using SQLite;
@@ -20,7 +21,7 @@ namespace RequestLibrary.ObjectClasses.Artificial.ShipThings.Modules
         [Column("energyreq")]
         public long energyReq { get; set; }
         [ForeignKey(typeof(BaseShip))]
-        public int equippedShipID { get; set; }
+        public int equippedShipID { get; set; }        
 
         public BaseModule(long weight, long energyReq)
         {
@@ -33,7 +34,7 @@ namespace RequestLibrary.ObjectClasses.Artificial.ShipThings.Modules
 
         }
 
-        public virtual void ApplyEffect()
+        public virtual void ApplyEffect(BaseShip shipToApplyTo)
         {
 
         }

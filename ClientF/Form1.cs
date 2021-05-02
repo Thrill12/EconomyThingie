@@ -1,6 +1,6 @@
 ﻿using RequestLibrary;
 using RequestLibrary.Alerts;
-using RequestLibrary.Form;
+using RequestLibrary.ObjectClasses.Artificial.ShipThings.Modules.PassiveModules;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -220,6 +220,25 @@ namespace ClientF
         {
             RefreshForm();
         }
-        #endregion    
+        #endregion
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+
+        }
+
+        private void AddQEModule_Click(object sender, EventArgs e)
+        {
+            QEDriveTier1 drive = new QEDriveTier1();
+            AddModuleRequest req = new AddModuleRequest(drive, currUser);
+            req.seshID = currUser.seshID;
+            currUser = client.SendRequest<User>(req, currUser);
+            currUser.equippedShip.UpdateShipStats();
+        }
     }
 }

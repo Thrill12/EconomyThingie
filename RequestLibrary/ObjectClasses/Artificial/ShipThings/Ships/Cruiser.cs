@@ -50,7 +50,7 @@ namespace RequestLibrary.ObjectClasses.Artificial.ShipThings.Ships
 
         public override void ResetStats()
         {
-            //base.ResetStats();
+            base.ResetStats();
             health = 5000;
             cargoLimit = 100;
             weight = 100;
@@ -60,17 +60,21 @@ namespace RequestLibrary.ObjectClasses.Artificial.ShipThings.Ships
 
         public override void UpdateShipStats()
         {
-            base.UpdateShipStats();
+            ResetStats();
             AddSlots();
-            ResetStats();         
+            UpdateModules();      
         }
 
         public override void AddSlots()
         {
             //base.AddSlots();
-            passiveSlots.Add(new Slot<BasePassiveModule>("Stern"));
-            passiveSlots.Add(new Slot<BasePassiveModule>("Bow"));
-            passiveSlots.Add(new Slot<BasePassiveModule>("EngineRoom"));
+            ResetStats();
+            if(passiveSlots.Count != 3)                             // <---- MAX SLOTS HERE, UPDATE IF NEED TO
+            {
+                passiveSlots.Add(new Slot<BasePassiveModule>("Stern"));
+                passiveSlots.Add(new Slot<BasePassiveModule>("Bow"));
+                passiveSlots.Add(new Slot<BasePassiveModule>("EngineRoom"));
+            }            
         }
     }
 }

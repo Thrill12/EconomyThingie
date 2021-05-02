@@ -71,7 +71,7 @@ namespace Server
             TcpClient client = obj as TcpClient;
 
             Stopwatch watch = Stopwatch.StartNew();
-            long timeout = 1000 * 60 * 10; // 5 seconds
+            long timeout = 1000 * 60 * 10; // 10 seconds
 
             using (NetworkStream stream = client.GetStream())
             {
@@ -87,21 +87,19 @@ namespace Server
                     HandleAlerts(stream);
                 }
 
-                stream.Flush();              
-            }
+                stream.Flush();
 
-            client.Close();
+                client.Dispose();
 
-            //Register user logout
-            if (users.ContainsKey(Thread.CurrentThread))
-            {
+                client.Close();
+
+                //Register user logout
                 User user = users[Thread.CurrentThread];
-                lock (users)
-                {
-                    ServerProgram.RemoveFromLive(user);
-                    users.Remove(Thread.CurrentThread);
-                }
+                users.Remove(Thread.CurrentThread);
+                ServerProgram.RemoveFromLive(user);
             }
+
+              
         }
 
         private void HandleRequest(NetworkStream stream)
@@ -184,7 +182,7 @@ namespace Server
         private Response CallRequestHandler(string strType, string json)
         {
             Type type = Type.GetType(strType);
-            object data = JsonConvert.DeserializeObject(json, type);
+            object data = JsonConvert.DeserializeObject(json, type, SerializationSettings.current);
 
             return registeredRequests[type].Invoke(data);
         }

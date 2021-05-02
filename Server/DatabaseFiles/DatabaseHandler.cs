@@ -8,6 +8,7 @@ using RequestLibrary.ObjectClasses.Artificial.ShipThings.Ships;
 using RequestLibrary.ObjectClasses.Artificial.ShipThings.Slots;
 using RequestLibrary.ObjectClasses.Artificial.ShipThings.Modules.PassiveModules;
 using RequestLibrary.ObjectClasses.Artificial.ShipThings.Modules;
+using RequestLibrary.ObjectClasses;
 
 namespace Server.DatabaseFiles
 {
@@ -23,6 +24,7 @@ namespace Server.DatabaseFiles
             db.CreateTable<User>();
             db.CreateTable<BaseShip>();
             db.CreateTable<BaseModule>();
+            db.CreateTable<Commodity>();
         }
 
         //public static void AddUser()
@@ -53,6 +55,11 @@ namespace Server.DatabaseFiles
         public static void InsertShip(BaseShip shipToAdd)
         {
             db.Insert(shipToAdd);
+        }
+
+        public static void InsertModule(BaseModule modToAdd)
+        {
+            db.Insert(modToAdd);
         }
 
         public static BaseShip GetShipById(int id)
@@ -94,6 +101,13 @@ namespace Server.DatabaseFiles
             //MAY NEED TO WRITE THIS
         }
 
+        public static void InsertMatter(Commodity matterToInsert)
+        {
+            db.Insert(matterToInsert);
+        }
+
+        #region SystemStuff
+
         public static List<StarSystem> FindJumpableSystems(StarSystem sys)
         {
             var query = db.Query<StarSystem>($"SELECT * FROM hyperlanes INNER JOIN starsystems ON hyperlanes.sysid2 = starsystems.id WHERE hyperlanes.sysid1 = {sys.ID}").ToList();
@@ -114,7 +128,7 @@ namespace Server.DatabaseFiles
             Console.WriteLine("Delete users too?");
             var ans = Console.ReadLine();
 
-            if(ans == "y")
+            if (ans == "y")
             {
                 db.DropTable<User>();
                 db.CreateTable<User>();
@@ -131,16 +145,16 @@ namespace Server.DatabaseFiles
 
             clusters.OrderByDescending(list => list.Count());
 
-                for (int i = 1; i < clusters.Count(); i++)
+            for (int i = 1; i < clusters.Count(); i++)
+            {
+                foreach (StarSystem system in clusters[i])
                 {
-                    foreach (StarSystem system in clusters[i])
-                    {
-                        int starID = system.ID;
+                    int starID = system.ID;
 
-                        db.Delete<StarSystem>(starID);
-                    }
-                    clusters[i].Clear();
+                    db.Delete<StarSystem>(starID);
                 }
+                clusters[i].Clear();
+            }
 
             Console.WriteLine("There are " + clusters[0].Count() + " systems in this cluster");
 
@@ -202,7 +216,7 @@ namespace Server.DatabaseFiles
         {
             db.RunInTransaction(() =>
             {
-                foreach(StarSystem sys in listToAdd)
+                foreach (StarSystem sys in listToAdd)
                 {
                     db.Insert(sys);
                 }
@@ -257,7 +271,7 @@ namespace Server.DatabaseFiles
         {
             var system = db.Query<StarSystem>($"SELECT * FROM starsystems WHERE id = {id}");
 
-            if(system == null)
+            if (system == null)
             {
                 Console.WriteLine("Couldn't find system.");
                 return null;
@@ -274,16 +288,6 @@ namespace Server.DatabaseFiles
             return systems;
         }
 
-        //public Boolean GetUser()
-        //{
-        //    var users = db.Query<Users>("SELECT * FROM users");
-
-        //    foreach (Users u in users)
-        //    {
-        //        Console.WriteLine(u.password);
-        //    }
-
-        //    return true;
-        //}
+        #endregion
     }
 }

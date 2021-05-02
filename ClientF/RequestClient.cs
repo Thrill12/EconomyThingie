@@ -61,7 +61,7 @@ namespace ClientF
 
             using (BinaryWriter writer = new BinaryWriter(client.GetStream(), Encoding.ASCII, leaveOpen: true))
             {
-                writer.Write($"{request.GetType().AssemblyQualifiedName}\n{JsonConvert.SerializeObject(request)}");
+                writer.Write($"{request.GetType().AssemblyQualifiedName}\n{JsonConvert.SerializeObject(request, SerializationSettings.current)}");
             }
         }
 
@@ -122,7 +122,7 @@ namespace ClientF
                     {
                         string[] response = reader.ReadString().Split('\n');
                         Type type = Type.GetType(response[0]);
-                        object data = JsonConvert.DeserializeObject(response[1], type);
+                        object data = JsonConvert.DeserializeObject(response[1], type, SerializationSettings.current);
 
                         if (type.IsSubclassOf(typeof(Alert)) && callbacks.ContainsKey(type))
                         {

@@ -5,7 +5,6 @@ using System.Data.SQLite;
 using System.Text;
 using RequestLibrary;
 using System.IO;
-using RequestLibrary.Form;
 using Server.DatabaseFiles;
 
 namespace Server
@@ -54,6 +53,8 @@ namespace Server
             listener.RegisterRequest<FindJumpableSystemsRequest>(RequestHandlers.FindJumpableSystemsRequestHandler);
             listener.RegisterRequest<FindLocalPlayersRequest>(RequestHandlers.FindLocalPlayersRequestHandler);
             listener.RegisterRequest<SendChatRequest>(RequestHandlers.SendChatRequestHandler);
+            listener.RegisterRequest<AddModuleRequest>(RequestHandlers.AddModuleRequestHandler);
+            listener.RegisterRequest<UserDisconnectRequest>(RequestHandlers.UserDisconnectRequestHandler);
 
             #endregion
 
