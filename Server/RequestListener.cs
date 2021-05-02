@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json;
+using RequestLibrary;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -10,15 +12,39 @@ using System.Threading;
 
 namespace Server
 {
-    class RequestListener
+    public class RequestListener
     {
 
         private Dictionary<Type, Func<object, Response>> registeredRequests = new Dictionary<Type, Func<object, Response>>();
         private TcpListener tcpListener;
 
+        private readonly Dictionary<Thread, User> users = new Dictionary<Thread, User>();
+        private readonly List<AlertBroadcast> alerts = new List<AlertBroadcast>();
+
+        public static RequestListener alerter;
+
         public RequestListener(ushort port)
         {
             tcpListener = new TcpListener(IPAddress.Any, port);
+            alerter = this;
+        }
+
+        public void RegisterUser(User user)
+        {
+            lock (users)
+            {
+                //TODO crashes if same thread logouts and logins in again
+                users.Add(Thread.CurrentThread, user);
+            }
+        }
+
+        public void SendAlerts<T>(T alert, params User[] receivers) where T : Alert
+        {
+            List<User> activeUsers = users.Values.Intersect(receivers).ToList();
+            lock (alerts)
+            {
+                alerts.Add(new AlertBroadcast(activeUsers, alert));
+            }
         }
 
         public void RegisterRequest<T>(Func<T, Response> callback)
@@ -30,6 +56,7 @@ namespace Server
         public void StartListening()
         {
             tcpListener.Start();
+            Console.WriteLine("Server is listening...");
 
             while (true)
             {
@@ -44,11 +71,11 @@ namespace Server
             TcpClient client = obj as TcpClient;
 
             Stopwatch watch = Stopwatch.StartNew();
-            long timeout = 1000 * 60 * 10; // 10 minutes
+            long timeout = 1000 * 60 * 10; // 10 seconds
 
             using (NetworkStream stream = client.GetStream())
             {
-                while (watch.ElapsedMilliseconds <= timeout)
+                while (watch.ElapsedMilliseconds <= timeout && client.Connected)
                 {
                     if (stream.DataAvailable)
                     {
@@ -56,12 +83,23 @@ namespace Server
 
                         watch.Restart();
                     }
+
+                    HandleAlerts(stream);
                 }
 
                 stream.Flush();
+
+                client.Dispose();
+
+                client.Close();
+
+                //Register user logout
+                User user = users[Thread.CurrentThread];
+                users.Remove(Thread.CurrentThread);
+                ServerProgram.RemoveFromLive(user);
             }
 
-            client.Close();
+              
         }
 
         private void HandleRequest(NetworkStream stream)
@@ -81,6 +119,58 @@ namespace Server
             }
         }
 
+        private void HandleAlerts(NetworkStream stream)
+        {
+            User user = null;
+            lock (users)
+            {
+                if (users.ContainsKey(Thread.CurrentThread))
+                    user = users[Thread.CurrentThread];
+            }
+
+            if (user != null)
+            {
+                bool sentAlerts = false;
+
+                lock (alerts)
+                {
+                    for (int i = 0; i < alerts.Count; i++)
+                    {
+                        AlertBroadcast alertBroadcast = alerts[i];
+                        if (alertBroadcast == null)
+                            continue;
+
+                        bool shouldSend = false;
+                        lock (alertBroadcast)
+                        {
+                            shouldSend = alertBroadcast.Receivers.Select(r => r.username).Contains(user.username);
+                        }
+
+                        if (shouldSend)
+                        {
+                            SendResponse(Response.From(alertBroadcast.Content), stream);
+                            Console.WriteLine("Sent an alert of type " + alertBroadcast.Content.GetType());
+                            sentAlerts = true;
+                        }
+                    }
+                }               
+
+                //Cleanup
+                if (sentAlerts)
+                {
+                    lock (alerts)
+                    {
+                        for (int i = alerts.Count - 1; i >= 0; i--)
+                        {
+                            alerts[i].Receivers.RemoveAll(r => r.username == user.username);
+                            if (alerts[i].Receivers.Count == 0)
+                                alerts.RemoveAt(i);
+                        }
+                    }
+                }
+            }
+        }
+
         private void SendResponse(Response response, Stream stream)
         {
             using (BinaryWriter writer = new BinaryWriter(stream, Encoding.ASCII, leaveOpen: true))
@@ -92,7 +182,7 @@ namespace Server
         private Response CallRequestHandler(string strType, string json)
         {
             Type type = Type.GetType(strType);
-            object data = JsonConvert.DeserializeObject(json, type);
+            object data = JsonConvert.DeserializeObject(json, type, SerializationSettings.current);
 
             return registeredRequests[type].Invoke(data);
         }
@@ -109,5 +199,16 @@ namespace Server
             };
         }
 
+        public class AlertBroadcast
+        {
+            public List<User> Receivers { get; set; }
+            public object Content { get; set; }
+
+            public AlertBroadcast(List<User> receivers, Alert content)
+            {
+                Receivers = receivers;
+                Content = content;
+            }
+        }
     }
 }

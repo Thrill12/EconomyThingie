@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using RequestLibrary;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,9 +13,9 @@ namespace Server
         public readonly Type type;
 
         public bool HasData => data != null;
-        public string DataString => $"{type.AssemblyQualifiedName}\n{JsonConvert.SerializeObject(data)}";
+        public string DataString => $"{type.AssemblyQualifiedName}\n{JsonConvert.SerializeObject(data, SerializationSettings.current)}";
 
-        private Response(object data, Type type)
+        public Response(object data, Type type)
         {
             this.data = data;
             this.type = type;
@@ -27,7 +28,7 @@ namespace Server
 
         public static Response From<T>(T data)
         {
-            return new Response(data, typeof(T));
+            return new Response(data, data.GetType());
         }
 
     }

@@ -10,5 +10,11 @@ namespace RequestLibrary
     public class SendChatRequest : AuthenticatedRequest
     {
         public string textToSend { get; set; }
+
+        public SendChatRequest(string textToSend)
+        {
+            this.textToSend = textToSend;
+        }
+
     }
 }

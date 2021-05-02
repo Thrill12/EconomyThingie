@@ -15,6 +15,7 @@ namespace ClientF
     public partial class LoginForm : Form
     {
         public User currUser;
+        RequestClient client = new RequestClient(IPAddress.Loopback, 57253);
 
         public LoginForm()
         {
@@ -26,14 +27,12 @@ namespace ClientF
             string username = UsernameBox.Text;
             string password = PasswordBox.Text;
 
-            RequestClient client = new RequestClient(IPAddress.Loopback, 57253);
-
             LoginRequest logReq = new LoginRequest(username, password);
             User chk = client.SendRequest<User>(logReq);
             if (chk != null)
             {
                 currUser = chk;
-                var f = new Form1(currUser);
+                var f = new Form1(currUser, client);
                 this.Hide();
                 MessageBox.Show("Login successful: " + currUser.username);
                 f.Show();
@@ -49,14 +48,12 @@ namespace ClientF
             string username = UsernameBox.Text;
             string password = PasswordBox.Text;
 
-            RequestClient client = new RequestClient(IPAddress.Loopback, 57253);
-
             CreateAccountRequest createReq = new CreateAccountRequest(username, password);
             User chk = client.SendRequest<User>(createReq);
             if (chk != null)
             {
                 currUser = chk;
-                var f = new Form1(currUser);
+                var f = new Form1(currUser, client);
                 this.Hide();
                 MessageBox.Show("Account created successfully: " + currUser.username);
                 f.Show();
@@ -68,6 +65,11 @@ namespace ClientF
         }
 
         private void UsernameBox_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void LoginForm_Load(object sender, EventArgs e)
         {
 
         }
